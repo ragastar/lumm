@@ -9,6 +9,7 @@ const nav = [
   { href: "/", label: "Dashboard", icon: "◆" },
   { href: "/reports", label: "Отчёты", icon: "◇" },
   { href: "/financials", label: "Финансы", icon: "◈" },
+  { href: "/analytics", label: "Аналитика", icon: "◈" },
   { href: "/calendar", label: "Календарь", icon: "◎" },
   { href: "/budget", label: "Бюджет", icon: "◉" },
   { href: "/fines", label: "Штрафы", icon: "◫" },

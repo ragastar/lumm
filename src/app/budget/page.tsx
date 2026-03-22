@@ -1,6 +1,5 @@
 import { db } from "@/db";
-import { monthlyFinancials, members } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { members } from "@/db/schema";
 
 export const dynamic = "force-dynamic";
 
@@ -15,65 +14,70 @@ function formatRub(n: number): string {
 export default async function BudgetPage() {
   const allMembers = await db.select().from(members);
 
-  // Get latest month financials for each member
-  const allFinancials = await db
-    .select()
-    .from(monthlyFinancials)
-    .orderBy(desc(monthlyFinancials.month));
-
-  // Group by member, take latest
-  const latestByMember = new Map<
-    string,
-    (typeof allFinancials)[0]
-  >();
-  for (const f of allFinancials) {
-    if (!latestByMember.has(f.memberId)) {
-      latestByMember.set(f.memberId, f);
-    }
-  }
-
-  // Total revenue and profit across group
-  const totalRevenue = [...latestByMember.values()].reduce(
-    (sum, f) => sum + (f.revenue ?? 0),
-    0
-  );
-  const totalProfit = [...latestByMember.values()].reduce(
-    (sum, f) => sum + (f.netProfit ?? 0),
-    0
-  );
-
-  // Monthly fee (from seed settings: fineAmount = 5000)
   const monthlyFee = 5000;
-  const groupBudget = monthlyFee * allMembers.length;
+  const monthlyTotal = monthlyFee * allMembers.length;
+  const yearlyTotal = monthlyTotal * 12;
+
+  // Mock: accumulated budget (6 months of contributions + some fines)
+  const monthsActive = 6;
+  const mockFinesCollected = 32500;
+  const totalCollected = monthlyTotal * monthsActive + mockFinesCollected;
+  const mockSpent = 87000; // на аренды, выезды
+  const balance = totalCollected - mockSpent;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
         <h1 className="text-3xl font-bold">Бюджет группы</h1>
         <p className="text-lumm-text-secondary mt-1">
-          Финансовый обзор Level Up Mastermind
+          Касса взносов Level Up Mastermind
+        </p>
+      </div>
+
+      {/* Balance Card */}
+      <div className="bg-gradient-to-r from-lumm-gold/10 to-lumm-gold/5 border border-lumm-gold/20 rounded-xl p-6">
+        <p className="text-sm text-lumm-gold font-medium mb-1">
+          Баланс кассы
+        </p>
+        <p className="text-4xl sm:text-5xl font-bold text-lumm-gold">
+          {formatRub(balance)}
+        </p>
+        <p className="text-sm text-lumm-text-secondary mt-2">
+          Собрано {formatRub(totalCollected)} · Потрачено{" "}
+          {formatRub(mockSpent)}
         </p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-lumm-black border border-lumm-gray-light rounded-xl p-5">
           <p className="text-sm text-lumm-text-secondary mb-1">
-            Ежемесячный взнос
+            Взнос / мес
           </p>
-          <p className="text-2xl font-bold text-lumm-gold">
+          <p className="text-2xl font-bold text-lumm-text-primary">
             {formatRub(monthlyFee)}
           </p>
           <p className="text-xs text-lumm-text-secondary mt-1">с участника</p>
         </div>
         <div className="bg-lumm-black border border-lumm-gray-light rounded-xl p-5">
-          <p className="text-sm text-lumm-text-secondary mb-1">Бюджет группы</p>
+          <p className="text-sm text-lumm-text-secondary mb-1">
+            Сбор / мес
+          </p>
           <p className="text-2xl font-bold text-lumm-text-primary">
-            {formatRub(groupBudget)}
+            {formatRub(monthlyTotal)}
           </p>
           <p className="text-xs text-lumm-text-secondary mt-1">
-            {allMembers.length} участников x {formatRub(monthlyFee)}
+            {allMembers.length} x {formatRub(monthlyFee)}
           </p>
+        </div>
+        <div className="bg-lumm-black border border-lumm-gray-light rounded-xl p-5">
+          <p className="text-sm text-lumm-text-secondary mb-1">
+            Сбор / год
+          </p>
+          <p className="text-2xl font-bold text-lumm-text-primary">
+            {formatRub(yearlyTotal)}
+          </p>
+          <p className="text-xs text-lumm-text-secondary mt-1">12 месяцев</p>
         </div>
         <div className="bg-lumm-black border border-lumm-gray-light rounded-xl p-5">
           <p className="text-sm text-lumm-text-secondary mb-1">Участников</p>
@@ -86,25 +90,11 @@ export default async function BudgetPage() {
         </div>
       </div>
 
-      {/* Group Revenue Summary */}
-      <div className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6">
-        <h3 className="text-sm font-medium text-lumm-text-secondary mb-1">
-          Совокупная выручка группы (последний месяц)
-        </h3>
-        <p className="text-3xl font-bold text-lumm-gold">
-          {formatRub(totalRevenue)}
-        </p>
-        <p className="text-sm text-lumm-text-secondary mt-2">
-          Совокупная прибыль:{" "}
-          <span className="text-green-400">{formatRub(totalProfit)}</span>
-        </p>
-      </div>
-
-      {/* Per-Member Table */}
+      {/* Contributions Table */}
       <div className="bg-lumm-black border border-lumm-gray-light rounded-xl overflow-hidden">
         <div className="px-6 py-3 border-b border-lumm-gray-light">
           <h3 className="text-sm font-medium text-lumm-text-secondary">
-            Вклад участников (последний месяц)
+            Взносы участников
           </h3>
         </div>
         <div className="overflow-x-auto">
@@ -112,19 +102,15 @@ export default async function BudgetPage() {
             <thead>
               <tr className="border-b border-lumm-gray-light text-sm text-lumm-text-secondary">
                 <th className="text-left px-6 py-3">Участник</th>
-                <th className="text-right px-6 py-3">Выручка</th>
-                <th className="text-right px-6 py-3">Прибыль</th>
-                <th className="text-right px-6 py-3">Доля</th>
+                <th className="text-center px-6 py-3">Статус</th>
+                <th className="text-right px-6 py-3">Взнос / мес</th>
+                <th className="text-right px-6 py-3">Оплачено</th>
               </tr>
             </thead>
             <tbody>
               {allMembers.map((m) => {
-                const fin = latestByMember.get(m.id);
-                const revenue = fin?.revenue ?? 0;
-                const share =
-                  totalRevenue > 0
-                    ? ((revenue / totalRevenue) * 100).toFixed(1)
-                    : "0";
+                // Mock: all paid for current month
+                const paid = monthlyFee * monthsActive;
                 return (
                   <tr
                     key={m.id}
@@ -138,27 +124,116 @@ export default async function BudgetPage() {
                         >
                           {m.displayName[0]}
                         </div>
-                        <span className="text-sm font-medium">
-                          {m.displayName}
-                        </span>
+                        <div>
+                          <span className="text-sm font-medium">
+                            {m.displayName}
+                          </span>
+                          <p className="text-xs text-lumm-text-secondary">
+                            {m.role}
+                          </p>
+                        </div>
                       </div>
                     </td>
+                    <td className="px-6 py-3 text-center">
+                      <span className="text-xs px-2 py-1 rounded bg-green-500/10 text-green-400">
+                        оплачено
+                      </span>
+                    </td>
                     <td className="px-6 py-3 text-sm text-right">
-                      {fin ? formatRub(revenue) : "—"}
+                      {formatRub(monthlyFee)}
                     </td>
                     <td className="px-6 py-3 text-sm text-right text-lumm-gold">
-                      {fin?.netProfit != null
-                        ? formatRub(fin.netProfit)
-                        : "—"}
-                    </td>
-                    <td className="px-6 py-3 text-sm text-right text-lumm-text-secondary">
-                      {share}%
+                      {formatRub(paid)}
                     </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Expenses */}
+      <div className="bg-lumm-black border border-lumm-gray-light rounded-xl overflow-hidden">
+        <div className="px-6 py-3 border-b border-lumm-gray-light">
+          <h3 className="text-sm font-medium text-lumm-text-secondary">
+            Расходы из кассы
+          </h3>
+        </div>
+        <div className="divide-y divide-lumm-gray-light/50">
+          {[
+            {
+              date: "2026-03-20",
+              desc: "Аренда коворкинга «Рабочая станция»",
+              amount: 15000,
+            },
+            {
+              date: "2026-02-20",
+              desc: "Аренда лофта «Флакон»",
+              amount: 18000,
+            },
+            {
+              date: "2026-01-16",
+              desc: "Аренда кофейни «Кофемания»",
+              amount: 12000,
+            },
+            {
+              date: "2025-12-18",
+              desc: "Аренда коворкинга «Рабочая станция»",
+              amount: 15000,
+            },
+            {
+              date: "2025-11-20",
+              desc: "Аренда переговорки «Красный Октябрь»",
+              amount: 14000,
+            },
+            {
+              date: "2025-10-16",
+              desc: "Полугодовой выезд — организация",
+              amount: 13000,
+            },
+          ].map((exp) => (
+            <div
+              key={exp.date}
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 px-6 py-3"
+            >
+              <div className="flex items-center gap-4">
+                <span className="text-xs text-lumm-text-secondary w-20 shrink-0">
+                  {new Date(exp.date + "T00:00:00").toLocaleDateString(
+                    "ru-RU",
+                    {
+                      day: "numeric",
+                      month: "short",
+                    }
+                  )}
+                </span>
+                <span className="text-sm text-lumm-text-primary">
+                  {exp.desc}
+                </span>
+              </div>
+              <span className="text-sm font-medium text-red-400 whitespace-nowrap">
+                -{formatRub(exp.amount)}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Fines collected */}
+      <div className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 className="text-sm font-medium text-lumm-text-secondary">
+              Собрано штрафов
+            </h3>
+            <p className="text-2xl font-bold text-lumm-gold mt-1">
+              {formatRub(mockFinesCollected)}
+            </p>
+          </div>
+          <p className="text-xs text-lumm-text-secondary max-w-xs">
+            Штрафы поступают в общую кассу и расходуются на аренду площадок и
+            организацию выездов
+          </p>
         </div>
       </div>
     </div>
