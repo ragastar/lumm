@@ -47,7 +47,7 @@ export default async function ReportsPage() {
           <div className="divide-y divide-lumm-gray-light">
             {weekReports.map((r) => (
               <div key={r.report.id} className="p-4">
-                <div className="flex items-center gap-3 mb-3">
+                <div className="flex flex-wrap items-center gap-3 mb-3">
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-lumm-dark"
                     style={{ backgroundColor: r.memberColor }}
@@ -67,7 +67,7 @@ export default async function ReportsPage() {
                     </span>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                   <div>
                     <p className="text-xs text-lumm-text-secondary mb-1">Бизнес</p>
                     <p className="text-lumm-text-primary">{r.report.businessText}</p>

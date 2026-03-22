@@ -26,7 +26,7 @@ export function Sparkline({ data, width = 150, height = 40, color = "#c9a84c" }:
   const gradId = `grad-${color.replace("#", "")}`;
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+    <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.3" />

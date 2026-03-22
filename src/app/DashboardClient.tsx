@@ -102,13 +102,13 @@ export function DashboardClient({ member, reports, financials, nextMeeting }: Pr
       {/* Next Meeting Card */}
       {nextMeeting && (
         <div className="relative overflow-hidden rounded-xl border border-lumm-gold/30 bg-gradient-to-r from-lumm-gold/10 to-lumm-gold/5 p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <p className="text-sm text-lumm-text-secondary mb-1">Следующая встреча</p>
-              <p className="text-xl font-semibold text-lumm-text-primary capitalize">
+              <p className="text-lg sm:text-xl font-semibold text-lumm-text-primary capitalize">
                 {formatDateRu(nextMeeting.date)}
               </p>
-              <div className="flex items-center gap-4 mt-2 text-sm text-lumm-text-secondary">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-2 text-sm text-lumm-text-secondary">
                 {nextMeeting.location && (
                   <span>📍 {nextMeeting.location}</span>
                 )}
@@ -117,8 +117,8 @@ export function DashboardClient({ member, reports, financials, nextMeeting }: Pr
                 )}
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-5xl font-bold text-lumm-gold">
+            <div className="text-left sm:text-right">
+              <p className="text-4xl sm:text-5xl font-bold text-lumm-gold">
                 {daysUntil(nextMeeting.date)}
               </p>
               <p className="text-sm text-lumm-text-secondary">
@@ -178,7 +178,9 @@ export function DashboardClient({ member, reports, financials, nextMeeting }: Pr
           <div>
             <p className="text-sm text-lumm-text-secondary mb-3">Выручка (6 мес.)</p>
             {revenueData.length >= 2 ? (
-              <Sparkline data={revenueData} width={400} height={60} color="#c9a84c" />
+              <div className="w-full overflow-hidden">
+                <Sparkline data={revenueData} width={400} height={60} color="#c9a84c" />
+              </div>
             ) : (
               <p className="text-lumm-text-secondary text-sm">Нет данных</p>
             )}
@@ -186,7 +188,9 @@ export function DashboardClient({ member, reports, financials, nextMeeting }: Pr
           <div>
             <p className="text-sm text-lumm-text-secondary mb-3">Чистая прибыль (6 мес.)</p>
             {profitData.length >= 2 ? (
-              <Sparkline data={profitData} width={400} height={60} color="#51cf66" />
+              <div className="w-full overflow-hidden">
+                <Sparkline data={profitData} width={400} height={60} color="#51cf66" />
+              </div>
             ) : (
               <p className="text-lumm-text-secondary text-sm">Нет данных</p>
             )}

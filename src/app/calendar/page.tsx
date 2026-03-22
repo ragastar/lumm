@@ -48,7 +48,7 @@ export default async function CalendarPage() {
             return (
               <div
                 key={m.meeting.id}
-                className="bg-gradient-to-r from-lumm-gold/10 to-lumm-gold/5 border border-lumm-gold/20 rounded-xl p-6 flex items-center gap-6"
+                className="bg-gradient-to-r from-lumm-gold/10 to-lumm-gold/5 border border-lumm-gold/20 rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6"
               >
                 <div className="text-center min-w-[80px]">
                   <p className="text-3xl font-bold text-lumm-gold">{days}</p>
@@ -103,7 +103,7 @@ export default async function CalendarPage() {
           {past.map((m) => (
             <div
               key={m.meeting.id}
-              className="bg-lumm-black border border-lumm-gray-light rounded-xl p-4 flex items-center gap-4"
+              className="bg-lumm-black border border-lumm-gray-light rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4"
             >
               <p className="text-sm text-lumm-text-secondary w-40">
                 {new Date(m.meeting.date + "T00:00:00").toLocaleDateString(

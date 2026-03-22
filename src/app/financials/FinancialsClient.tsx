@@ -67,7 +67,7 @@ export function FinancialsClient({ member, financials }: Props) {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Финансы</h1>
           <p className="text-lumm-text-secondary mt-1">
@@ -90,7 +90,7 @@ export function FinancialsClient({ member, financials }: Props) {
         >
           <h3 className="text-lg font-medium text-lumm-gold">Месячный отчёт</h3>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-lumm-text-secondary mb-1">
                 Месяц
@@ -104,7 +104,7 @@ export function FinancialsClient({ member, financials }: Props) {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm text-lumm-text-secondary mb-1">
                 Выручка (вал), ₽ *
@@ -139,7 +139,7 @@ export function FinancialsClient({ member, financials }: Props) {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm text-lumm-text-secondary mb-1">
                 Бизнес (1-10) *
@@ -216,16 +216,20 @@ export function FinancialsClient({ member, financials }: Props) {
 
       {/* Sparklines */}
       {revenueData.length >= 2 && (
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6">
             <p className="text-sm text-lumm-text-secondary mb-3">Выручка (6 мес)</p>
-            <Sparkline data={revenueData} width={450} height={60} color="#c9a84c" />
+            <div className="w-full overflow-hidden">
+              <Sparkline data={revenueData} width={450} height={60} color="#c9a84c" />
+            </div>
           </div>
           <div className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6">
             <p className="text-sm text-lumm-text-secondary mb-3">
               Чистая прибыль (6 мес)
             </p>
-            <Sparkline data={profitData} width={450} height={60} color="#51cf66" />
+            <div className="w-full overflow-hidden">
+              <Sparkline data={profitData} width={450} height={60} color="#51cf66" />
+            </div>
           </div>
         </div>
       )}
@@ -237,7 +241,8 @@ export function FinancialsClient({ member, financials }: Props) {
             История отчётов
           </h3>
         </div>
-        <table className="w-full">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[500px]">
           <thead>
             <tr className="border-b border-lumm-gray-light text-sm text-lumm-text-secondary">
               <th className="text-left px-6 py-3">Месяц</th>
@@ -277,6 +282,7 @@ export function FinancialsClient({ member, financials }: Props) {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
