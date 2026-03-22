@@ -14,7 +14,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 bg-lumm-black border-r border-lumm-gray-light flex flex-col h-screen sticky top-0">
+    <>
       <div className="p-6 border-b border-lumm-gray-light">
         <h1 className="text-2xl font-bold text-lumm-gold tracking-wider">LUMM</h1>
         <p className="text-xs text-lumm-text-secondary mt-1">Level Up Mastermind</p>
@@ -38,6 +38,6 @@ export function Sidebar() {
           );
         })}
       </nav>
-    </aside>
+    </>
   );
 }
