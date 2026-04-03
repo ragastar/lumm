@@ -12,12 +12,25 @@ export const members = sqliteTable("members", {
   id: text("id").primaryKey(),
   groupId: text("group_id").notNull().references(() => groups.id),
   telegramId: text("telegram_id"),
+  username: text("username"),
+  passwordHash: text("password_hash"),
   displayName: text("display_name").notNull(),
   realName: text("real_name"),
-  role: text("role", { enum: ["member", "moderator", "treasurer", "admin"] }).notNull().default("member"),
-  status: text("status", { enum: ["active", "trial", "inactive"] }).notNull().default("active"),
+  avatarUrl: text("avatar_url"),
+  role: text("role", { enum: ["admin", "member"] }).notNull().default("member"),
+  status: text("status", { enum: ["active", "inactive"] }).notNull().default("active"),
   avatarColor: text("avatar_color").notNull().default("#c9a84c"),
   createdAt: text("created_at").notNull(),
+});
+
+export const invites = sqliteTable("invites", {
+  id: text("id").primaryKey(),
+  groupId: text("group_id").notNull().references(() => groups.id),
+  token: text("token").notNull().unique(),
+  createdBy: text("created_by").notNull().references(() => members.id),
+  expiresAt: text("expires_at").notNull(),
+  usedBy: text("used_by").references(() => members.id),
+  usedAt: text("used_at"),
 });
 
 export const weeklyReports = sqliteTable("weekly_reports", {
