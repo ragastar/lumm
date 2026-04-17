@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { UserSwitcher } from "./UserSwitcher";
+import { UserMenu } from "./UserMenu";
 
 const nav = [
   { href: "/", label: "Dashboard", icon: "◆" },
@@ -47,7 +47,7 @@ export function Sidebar() {
         })}
       </nav>
       <div className="p-4 border-t border-lumm-gray-light">
-        <UserSwitcher />
+        <UserMenu />
       </div>
     </>
   );
