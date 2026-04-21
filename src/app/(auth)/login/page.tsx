@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { TelegramBotLogin } from "@/components/TelegramBotLogin";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,41 +15,6 @@ export default function LoginPage() {
     fetch("/api/auth/me").then((r) => {
       if (r.ok) router.replace("/");
     });
-  }, [router]);
-
-  useEffect(() => {
-    const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
-    if (!botUsername) return;
-
-    (window as unknown as Record<string, unknown>).onTelegramAuth = async (user: Record<string, unknown>) => {
-      setError("");
-      setLoading(true);
-      const res = await fetch("/api/auth/telegram", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(user),
-      });
-      if (res.ok) {
-        router.push("/");
-      } else {
-        const data = await res.json();
-        setError(data.error || "Ошибка входа через Telegram");
-        setLoading(false);
-      }
-    };
-
-    const container = document.getElementById("telegram-login");
-    if (container && !container.hasChildNodes()) {
-      const script = document.createElement("script");
-      script.src = "https://telegram.org/js/telegram-widget.js?22";
-      script.setAttribute("data-telegram-login", botUsername);
-      script.setAttribute("data-size", "large");
-      script.setAttribute("data-radius", "8");
-      script.setAttribute("data-onauth", "onTelegramAuth(user)");
-      script.setAttribute("data-request-access", "write");
-      script.async = true;
-      container.appendChild(script);
-    }
   }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -80,11 +46,17 @@ export default function LoginPage() {
           <p className="text-sm text-lumm-text-secondary mt-1">Level Up Mastermind</p>
         </div>
 
-        <div id="telegram-login" className="flex justify-center mb-6" />
+        <TelegramBotLogin
+          purpose="login"
+          onSuccess={(needsOnboarding) =>
+            router.push(needsOnboarding ? "/onboard" : "/")
+          }
+          onError={(e) => setError(e)}
+        />
 
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 my-6">
           <div className="flex-1 h-px bg-lumm-gray-light" />
-          <span className="text-xs text-lumm-text-secondary">или</span>
+          <span className="text-xs text-lumm-text-secondary">или логин и пароль</span>
           <div className="flex-1 h-px bg-lumm-gray-light" />
         </div>
 
