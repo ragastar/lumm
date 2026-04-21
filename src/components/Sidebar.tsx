@@ -5,12 +5,20 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { UserMenu } from "./UserMenu";
 
-const nav = [
+type NavItem = {
+  href: string;
+  label: string;
+  icon: string;
+  badge?: string;
+};
+
+const nav: NavItem[] = [
   { href: "/", label: "Dashboard", icon: "◆" },
   { href: "/reports", label: "Отчёты", icon: "◇" },
   { href: "/financials", label: "Финансы", icon: "◈" },
   { href: "/analytics", label: "Аналитика", icon: "◈" },
   { href: "/calendar", label: "Календарь", icon: "◎" },
+  { href: "/members", label: "Участники", icon: "◐", badge: "NEW" },
   { href: "/budget", label: "Бюджет", icon: "◉" },
   { href: "/fines", label: "Штрафы", icon: "◫" },
   { href: "/constitution", label: "Конституция", icon: "◩" },
@@ -42,6 +50,11 @@ export function Sidebar() {
             >
               <span className="text-lg">{item.icon}</span>
               <span className="font-medium">{item.label}</span>
+              {item.badge && (
+                <span className="ml-auto px-2 py-0.5 text-xs bg-lumm-gold text-lumm-dark rounded font-bold">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           );
         })}
