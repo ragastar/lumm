@@ -8,6 +8,11 @@ import { Avatar } from "@/components/Avatar";
 
 export const dynamic = "force-dynamic";
 
+function truncate(s: string | null, n: number): string | null {
+  if (!s) return null;
+  return s.length <= n ? s : s.slice(0, n - 1).trimEnd() + "…";
+}
+
 export default async function MembersPage() {
   const user = await getCurrentUser();
   if (!user) {
@@ -21,6 +26,8 @@ export default async function MembersPage() {
       role: members.role,
       avatarColor: members.avatarColor,
       avatarUrl: members.avatarUrl,
+      businessGoal: members.businessGoal,
+      sportGoal: members.sportGoal,
     })
     .from(members)
     .where(and(eq(members.groupId, user.groupId), eq(members.status, "active")))
@@ -50,6 +57,16 @@ export default async function MembersPage() {
             />
             <p className="text-lumm-text-primary font-medium text-center">{m.displayName}</p>
             <p className="text-xs text-lumm-text-secondary">{m.role}</p>
+            {(m.businessGoal || m.sportGoal) && (
+              <div className="w-full text-xs text-lumm-text-secondary mt-2 space-y-1">
+                {m.businessGoal && (
+                  <p className="truncate"><span className="text-lumm-gold">Бизнес:</span> {truncate(m.businessGoal, 80)}</p>
+                )}
+                {m.sportGoal && (
+                  <p className="truncate"><span className="text-lumm-gold">Спорт:</span> {truncate(m.sportGoal, 80)}</p>
+                )}
+              </div>
+            )}
           </Link>
         ))}
       </div>
