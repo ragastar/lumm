@@ -38,7 +38,11 @@ export async function proxy(request: NextRequest) {
   try {
     const { payload } = await jwtVerify(token, secret);
 
-    if (pathname.startsWith("/admin") || pathname === "/api/invites") {
+    if (
+      pathname.startsWith("/admin") ||
+      pathname.startsWith("/api/admin") ||
+      pathname === "/api/invites"
+    ) {
       if (payload.role !== "admin") {
         return NextResponse.redirect(new URL("/", request.url));
       }
