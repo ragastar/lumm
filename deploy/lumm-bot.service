@@ -1,0 +1,14 @@
+[Unit]
+Description=LUMM Telegram Bot
+After=network.target lumm.service
+
+[Service]
+Type=simple
+WorkingDirectory=/root/lumm
+ExecStart=/usr/bin/npm run bot
+Restart=always
+RestartSec=5
+EnvironmentFile=/root/lumm/.env
+
+[Install]
+WantedBy=multi-user.target
