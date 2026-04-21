@@ -1,4 +1,5 @@
 import { Bot } from "grammy";
+import { registerLoginHandlers } from "./login-handlers";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 if (!token) {
@@ -8,7 +9,7 @@ if (!token) {
 
 const bot = new Bot(token);
 
-bot.command("start", (ctx) => ctx.reply("LUMM Bot запущен! 🏆"));
+registerLoginHandlers(bot);
 
 bot.catch((err) => {
   console.error("Bot error:", err);
