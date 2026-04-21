@@ -37,6 +37,8 @@ export default async function MemberDetailPage({
       avatarColor: members.avatarColor,
       avatarUrl: members.avatarUrl,
       createdAt: members.createdAt,
+      businessGoal: members.businessGoal,
+      sportGoal: members.sportGoal,
     })
     .from(members)
     .where(and(eq(members.id, id), eq(members.groupId, user.groupId)))
@@ -69,6 +71,22 @@ export default async function MemberDetailPage({
           {m.role}
         </span>
         <p className="text-sm text-lumm-text-secondary">Участник с {formatDate(m.createdAt)}</p>
+      </div>
+
+      <div className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-lumm-text-primary">Цели</h2>
+        <div>
+          <p className="text-xs text-lumm-text-secondary uppercase tracking-wide mb-1">Бизнес</p>
+          <p className="text-sm text-lumm-text-primary whitespace-pre-wrap">
+            {m.businessGoal ?? <span className="text-lumm-text-secondary">—</span>}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-lumm-text-secondary uppercase tracking-wide mb-1">Спорт</p>
+          <p className="text-sm text-lumm-text-primary whitespace-pre-wrap">
+            {m.sportGoal ?? <span className="text-lumm-text-secondary">—</span>}
+          </p>
+        </div>
       </div>
     </div>
   );
