@@ -50,6 +50,15 @@ export function UserMenu() {
 
       {open && (
         <div className="absolute bottom-full left-0 w-full mb-2 bg-lumm-gray border border-lumm-gray-light rounded-lg shadow-xl overflow-hidden z-50">
+          <button
+            onClick={() => {
+              setOpen(false);
+              router.push("/profile");
+            }}
+            className="w-full text-left px-3 py-2 text-sm text-lumm-text-primary hover:bg-lumm-gray-light transition-colors"
+          >
+            Мой профиль
+          </button>
           {isAdmin && (
             <>
               <button
@@ -68,7 +77,7 @@ export function UserMenu() {
                 }}
                 className="w-full text-left px-3 py-2 text-sm text-lumm-text-primary hover:bg-lumm-gray-light transition-colors"
               >
-                Участники
+                Управление участниками
               </button>
             </>
           )}
