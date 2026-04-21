@@ -10,23 +10,69 @@ type NavItem = {
   label: string;
   icon: string;
   badge?: string;
+  disabled?: boolean;
 };
 
-const nav: NavItem[] = [
+const activeNav: NavItem[] = [
   { href: "/", label: "Dashboard", icon: "◆" },
   { href: "/reports", label: "Отчёты", icon: "◇" },
   { href: "/financials", label: "Финансы", icon: "◈" },
   { href: "/analytics", label: "Аналитика", icon: "◈" },
   { href: "/calendar", label: "Календарь", icon: "◎" },
   { href: "/members", label: "Участники", icon: "◐", badge: "NEW" },
-  { href: "/budget", label: "Бюджет", icon: "◉" },
-  { href: "/fines", label: "Штрафы", icon: "◫" },
   { href: "/constitution", label: "Конституция", icon: "◩" },
 ];
+
+const inDevelopmentNav: NavItem[] = [
+  { href: "/budget", label: "Бюджет", icon: "◉", disabled: true },
+  { href: "/fines", label: "Штрафы", icon: "◫", disabled: true },
+];
+
+function renderNavItem(item: NavItem, active: boolean, onClick: () => void) {
+  const inner = (
+    <>
+      <span className="text-lg">{item.icon}</span>
+      <span className="font-medium">{item.label}</span>
+      {item.badge && (
+        <span className="ml-auto px-2 py-0.5 text-xs bg-lumm-gold text-lumm-dark rounded font-bold">
+          {item.badge}
+        </span>
+      )}
+    </>
+  );
+
+  if (item.disabled) {
+    return (
+      <div
+        key={item.href}
+        className="flex items-center gap-3 px-4 py-3 rounded-lg text-lumm-text-secondary/40 cursor-not-allowed select-none"
+        title="В разработке"
+      >
+        {inner}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      key={item.href}
+      href={item.href}
+      onClick={onClick}
+      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+        active
+          ? "bg-lumm-gold/10 text-lumm-gold border border-lumm-gold/20"
+          : "text-lumm-text-secondary hover:text-lumm-text-primary hover:bg-lumm-gray/50"
+      }`}
+    >
+      {inner}
+    </Link>
+  );
+}
 
 export function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const close = () => setMobileOpen(false);
 
   const navContent = (
     <>
@@ -35,29 +81,19 @@ export function Sidebar() {
         <p className="text-xs text-lumm-text-secondary mt-1">Level Up Mastermind</p>
       </div>
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        {nav.map((item) => {
-          const active = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                active
-                  ? "bg-lumm-gold/10 text-lumm-gold border border-lumm-gold/20"
-                  : "text-lumm-text-secondary hover:text-lumm-text-primary hover:bg-lumm-gray/50"
-              }`}
-            >
-              <span className="text-lg">{item.icon}</span>
-              <span className="font-medium">{item.label}</span>
-              {item.badge && (
-                <span className="ml-auto px-2 py-0.5 text-xs bg-lumm-gold text-lumm-dark rounded font-bold">
-                  {item.badge}
-                </span>
-              )}
-            </Link>
-          );
-        })}
+        {activeNav.map((item) => renderNavItem(item, pathname === item.href, close))}
+
+        <div className="pt-4 pb-2 px-4">
+          <div className="flex items-center gap-2">
+            <div className="h-px bg-lumm-gray-light flex-1" />
+            <span className="text-[10px] uppercase tracking-wider text-lumm-text-secondary/60">
+              в разработке
+            </span>
+            <div className="h-px bg-lumm-gray-light flex-1" />
+          </div>
+        </div>
+
+        {inDevelopmentNav.map((item) => renderNavItem(item, pathname === item.href, close))}
       </nav>
       <div className="p-4 border-t border-lumm-gray-light">
         <UserMenu />
