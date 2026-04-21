@@ -110,7 +110,7 @@ export function MembersClient({
           disabled={activating}
           className="bg-lumm-gold text-lumm-black font-medium px-4 py-2 rounded-lg disabled:opacity-50 text-sm whitespace-nowrap"
         >
-          {activating ? "Отправляю..." : "Активировать цели"}
+          {activating ? "Пингую..." : "Пингануть команду"}
         </button>
       </div>
 
