@@ -18,6 +18,8 @@ export async function GET() {
       avatarColor: members.avatarColor,
       avatarUrl: members.avatarUrl,
       createdAt: members.createdAt,
+      businessGoal: members.businessGoal,
+      sportGoal: members.sportGoal,
     })
     .from(members)
     .where(and(eq(members.groupId, user.groupId), eq(members.status, "active")))

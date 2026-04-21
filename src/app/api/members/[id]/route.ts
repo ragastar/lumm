@@ -23,6 +23,8 @@ export async function GET(
       avatarColor: members.avatarColor,
       avatarUrl: members.avatarUrl,
       createdAt: members.createdAt,
+      businessGoal: members.businessGoal,
+      sportGoal: members.sportGoal,
     })
     .from(members)
     .where(and(eq(members.id, id), eq(members.groupId, user.groupId)))
