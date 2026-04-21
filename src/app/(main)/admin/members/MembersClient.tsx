@@ -32,6 +32,7 @@ export function MembersClient({
   const [newPassword, setNewPassword] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [activating, setActivating] = useState(false);
 
   const resetPassword = async (member: Member) => {
     setBusyId(member.id);
@@ -81,13 +82,36 @@ export function MembersClient({
     setCopied(false);
   };
 
+  const activateGoals = async () => {
+    const preview = `Друзья, команда Level Up!\n\nВремя зафиксировать цели на этот сезон — бизнес и спорт.\n\nЗайди в https://lumm.space/profile → «Мои цели».\n\nКак заполнимся — двинем дальше по программе.`;
+    if (!confirm(`Отправить в групповой чат:\n\n${preview}`)) return;
+    setActivating(true);
+    const res = await fetch("/api/admin/activate-goals", { method: "POST" });
+    setActivating(false);
+    if (res.ok) {
+      alert("Сообщение отправлено в группу");
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Ошибка: ${data.error || res.statusText}`);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-lumm-text-primary">Участники</h1>
-        <p className="text-sm text-lumm-text-secondary mt-1">
-          Управление участниками группы: сброс паролей, деактивация
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-lumm-text-primary">Участники</h1>
+          <p className="text-sm text-lumm-text-secondary mt-1">
+            Управление участниками группы: сброс паролей, деактивация
+          </p>
+        </div>
+        <button
+          onClick={activateGoals}
+          disabled={activating}
+          className="bg-lumm-gold text-lumm-black font-medium px-4 py-2 rounded-lg disabled:opacity-50 text-sm whitespace-nowrap"
+        >
+          {activating ? "Отправляю..." : "Активировать цели"}
+        </button>
       </div>
 
       <div className="bg-lumm-black border border-lumm-gray-light rounded-xl overflow-hidden">
