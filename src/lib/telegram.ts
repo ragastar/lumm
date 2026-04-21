@@ -1,4 +1,4 @@
-import { createHmac } from "crypto";
+import { createHash, createHmac } from "crypto";
 
 type TelegramLoginData = {
   id: number;
@@ -16,11 +16,12 @@ export function verifyTelegramLogin(data: TelegramLoginData): boolean {
 
   const { hash, ...rest } = data;
   const checkString = Object.keys(rest)
+    .filter((k) => rest[k as keyof typeof rest] !== undefined)
     .sort()
     .map((k) => `${k}=${rest[k as keyof typeof rest]}`)
     .join("\n");
 
-  const secretKey = createHmac("sha256", "WebAppData").update(botToken).digest();
+  const secretKey = createHash("sha256").update(botToken).digest();
   const hmac = createHmac("sha256", secretKey).update(checkString).digest("hex");
 
   if (hmac !== hash) return false;

@@ -6,10 +6,22 @@ const secret = new TextEncoder().encode(process.env.JWT_SECRET || "dev-secret");
 
 const publicPaths = ["/login", "/invite", "/api/auth"];
 
+function isPublicInviteApi(pathname: string): boolean {
+  // GET /api/invites/[token] — проверка валидности (публично)
+  // POST /api/invites/[token]/claim — регистрация по ссылке (публично)
+  // НО: /api/invites (список/создание) — admin-only
+  const match = pathname.match(/^\/api\/invites\/([^/]+)(\/claim)?$/);
+  return !!match;
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (publicPaths.some((p) => pathname.startsWith(p))) {
+    return NextResponse.next();
+  }
+
+  if (isPublicInviteApi(pathname)) {
     return NextResponse.next();
   }
 
@@ -26,7 +38,7 @@ export async function proxy(request: NextRequest) {
   try {
     const { payload } = await jwtVerify(token, secret);
 
-    if (pathname.startsWith("/admin") || pathname.startsWith("/api/invites")) {
+    if (pathname.startsWith("/admin") || pathname === "/api/invites") {
       if (payload.role !== "admin") {
         return NextResponse.redirect(new URL("/", request.url));
       }
