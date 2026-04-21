@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Avatar } from "./Avatar";
 
 type Member = {
   id: string;
   displayName: string;
   role: string;
   avatarColor: string;
+  avatarUrl: string | null;
 };
 
 export function UserMenu() {
@@ -36,12 +38,12 @@ export function UserMenu() {
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-lumm-gray/50 transition-colors"
       >
-        <div
-          className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-lumm-dark"
-          style={{ backgroundColor: current.avatarColor }}
-        >
-          {current.displayName[0]?.toUpperCase()}
-        </div>
+        <Avatar
+          displayName={current.displayName}
+          avatarColor={current.avatarColor}
+          avatarUrl={current.avatarUrl}
+          size="md"
+        />
         <div className="text-left flex-1">
           <p className="text-sm font-medium text-lumm-text-primary">{current.displayName}</p>
           <p className="text-xs text-lumm-text-secondary">{current.role}</p>

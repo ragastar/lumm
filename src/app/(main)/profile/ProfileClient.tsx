@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Avatar } from "@/components/Avatar";
 
 const AVATAR_COLORS = [
   "#c9a84c", "#e06c75", "#61afef", "#98c379",
@@ -12,6 +13,7 @@ type Props = {
   initial: {
     displayName: string;
     avatarColor: string;
+    avatarUrl: string | null;
     role: string;
     hasPassword: boolean;
   };
@@ -21,14 +23,54 @@ export function ProfileClient({ initial }: Props) {
   const router = useRouter();
   const [displayName, setDisplayName] = useState(initial.displayName);
   const [avatarColor, setAvatarColor] = useState(initial.avatarColor);
+  const [avatarUrl, setAvatarUrl] = useState(initial.avatarUrl);
   const [profileMsg, setProfileMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
+
+  const [avatarMsg, setAvatarMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pwMsg, setPwMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [pwLoading, setPwLoading] = useState(false);
+
+  const uploadAvatar = async (file: File) => {
+    setAvatarMsg(null);
+    setAvatarLoading(true);
+
+    const fd = new FormData();
+    fd.append("file", file);
+
+    const res = await fetch("/api/auth/avatar", { method: "POST", body: fd });
+    setAvatarLoading(false);
+
+    if (res.ok) {
+      const data = await res.json();
+      setAvatarUrl(data.avatarUrl);
+      setAvatarMsg({ type: "ok", text: "Аватар обновлён" });
+      router.refresh();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setAvatarMsg({ type: "err", text: data.error || "Ошибка загрузки" });
+    }
+  };
+
+  const removeAvatar = async () => {
+    setAvatarMsg(null);
+    setAvatarLoading(true);
+    const res = await fetch("/api/auth/avatar", { method: "DELETE" });
+    setAvatarLoading(false);
+    if (res.ok) {
+      setAvatarUrl(null);
+      setAvatarMsg({ type: "ok", text: "Аватар удалён" });
+      router.refresh();
+    } else {
+      setAvatarMsg({ type: "err", text: "Не удалось удалить" });
+    }
+  };
 
   const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,8 +122,6 @@ export function ProfileClient({ initial }: Props) {
     }
   };
 
-  const initial0 = displayName.trim().charAt(0).toUpperCase() || "?";
-
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <div>
@@ -91,20 +131,67 @@ export function ProfileClient({ initial }: Props) {
         </p>
       </div>
 
+      <div className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6 space-y-5">
+        <h2 className="text-xl font-bold text-lumm-text-primary">Аватар</h2>
+
+        <div className="flex items-center gap-6">
+          <Avatar
+            displayName={displayName}
+            avatarColor={avatarColor}
+            avatarUrl={avatarUrl}
+            size="lg"
+          />
+
+          <div className="flex flex-col gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) uploadAvatar(f);
+                e.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={avatarLoading}
+              className="px-4 py-2 bg-lumm-gold text-lumm-dark font-medium rounded-lg hover:bg-lumm-gold-light disabled:opacity-50 transition-colors text-sm"
+            >
+              {avatarLoading ? "Загрузка..." : avatarUrl ? "Заменить картинку" : "Загрузить картинку"}
+            </button>
+            {avatarUrl && (
+              <button
+                type="button"
+                onClick={removeAvatar}
+                disabled={avatarLoading}
+                className="px-4 py-2 bg-lumm-gray border border-lumm-gray-light text-red-400 rounded-lg hover:bg-lumm-gray-light disabled:opacity-50 transition-colors text-sm"
+              >
+                Удалить картинку
+              </button>
+            )}
+          </div>
+        </div>
+
+        {avatarMsg && (
+          <p className={`text-sm ${avatarMsg.type === "ok" ? "text-green-400" : "text-red-400"}`}>
+            {avatarMsg.text}
+          </p>
+        )}
+
+        <p className="text-xs text-lumm-text-secondary">
+          До 5MB. JPG, PNG или WebP. Картинка автоматически обрезается до квадрата 256×256.
+          Если картинки нет — показывается цветной кружок с первой буквой ника.
+        </p>
+      </div>
+
       <form
         onSubmit={saveProfile}
         className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6 space-y-5"
       >
         <h2 className="text-xl font-bold text-lumm-text-primary">Публичные данные</h2>
-
-        <div className="flex justify-center">
-          <div
-            className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-lumm-dark transition-colors"
-            style={{ backgroundColor: avatarColor }}
-          >
-            {initial0}
-          </div>
-        </div>
 
         <div>
           <label className="block text-sm text-lumm-text-secondary mb-1">Никнейм</label>
@@ -119,7 +206,9 @@ export function ProfileClient({ initial }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm text-lumm-text-secondary mb-2">Цвет аватара</label>
+          <label className="block text-sm text-lumm-text-secondary mb-2">
+            Цвет аватара (используется, если нет картинки)
+          </label>
           <div className="flex gap-2 flex-wrap">
             {AVATAR_COLORS.map((color) => (
               <button

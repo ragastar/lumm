@@ -15,6 +15,7 @@ export default async function ProfilePage() {
       initial={{
         displayName: user.displayName,
         avatarColor: user.avatarColor,
+        avatarUrl: user.avatarUrl,
         role: user.role,
         hasPassword: !!user.passwordHash,
       }}
