@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { TelegramBotLogin } from "@/components/TelegramBotLogin";
 
 export function InviteClient({ token }: { token: string }) {
   const router = useRouter();
@@ -10,41 +11,6 @@ export function InviteClient({ token }: { token: string }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
-    if (!botUsername) return;
-
-    (window as unknown as Record<string, unknown>).onTelegramAuth = async (user: Record<string, unknown>) => {
-      setError("");
-      setLoading(true);
-      const res = await fetch(`/api/invites/${token}/claim`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ method: "telegram", telegramData: user }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        router.push("/onboard");
-      } else {
-        setError(data.error || "Ошибка регистрации");
-        setLoading(false);
-      }
-    };
-
-    const container = document.getElementById("telegram-login");
-    if (container && !container.hasChildNodes()) {
-      const script = document.createElement("script");
-      script.src = "https://telegram.org/js/telegram-widget.js?22";
-      script.setAttribute("data-telegram-login", botUsername);
-      script.setAttribute("data-size", "large");
-      script.setAttribute("data-radius", "8");
-      script.setAttribute("data-onauth", "onTelegramAuth(user)");
-      script.setAttribute("data-request-access", "write");
-      script.async = true;
-      container.appendChild(script);
-    }
-  }, [token, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -83,11 +49,18 @@ export function InviteClient({ token }: { token: string }) {
           <p className="text-sm text-lumm-text-secondary mt-1">Присоединиться к Level Up</p>
         </div>
 
-        <div id="telegram-login" className="flex justify-center mb-6" />
+        <TelegramBotLogin
+          purpose="invite"
+          inviteToken={token}
+          onSuccess={(needsOnboarding) =>
+            router.push(needsOnboarding ? "/onboard" : "/")
+          }
+          onError={(e) => setError(e)}
+        />
 
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 my-6">
           <div className="flex-1 h-px bg-lumm-gray-light" />
-          <span className="text-xs text-lumm-text-secondary">или</span>
+          <span className="text-xs text-lumm-text-secondary">или логин и пароль</span>
           <div className="flex-1 h-px bg-lumm-gray-light" />
         </div>
 
@@ -97,7 +70,10 @@ export function InviteClient({ token }: { token: string }) {
             <input
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                if (error) setError("");
+              }}
               className="w-full bg-lumm-gray border border-lumm-gray-light rounded-lg px-3 py-2 text-lumm-text-primary focus:outline-none focus:border-lumm-gold"
               required
             />
@@ -107,7 +83,10 @@ export function InviteClient({ token }: { token: string }) {
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (error) setError("");
+              }}
               className="w-full bg-lumm-gray border border-lumm-gray-light rounded-lg px-3 py-2 text-lumm-text-primary focus:outline-none focus:border-lumm-gold"
               required
               minLength={6}
@@ -118,7 +97,10 @@ export function InviteClient({ token }: { token: string }) {
             <input
               type="password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (error) setError("");
+              }}
               className="w-full bg-lumm-gray border border-lumm-gray-light rounded-lg px-3 py-2 text-lumm-text-primary focus:outline-none focus:border-lumm-gold"
               required
             />
