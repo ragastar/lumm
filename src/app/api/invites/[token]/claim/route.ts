@@ -25,7 +25,7 @@ export async function POST(
 
   const invite = inviteResult[0];
 
-  if (invite.usedBy) {
+  if (invite.usedCount >= invite.maxUses) {
     return Response.json({ error: "Приглашение уже использовано" }, { status: 410 });
   }
 
@@ -102,7 +102,7 @@ export async function POST(
 
   await db
     .update(invites)
-    .set({ usedBy: memberId, usedAt: now })
+    .set({ usedBy: memberId, usedAt: now, usedCount: invite.usedCount + 1 })
     .where(eq(invites.id, invite.id));
 
   const jwtToken = await signJWT({ sub: memberId, role: "member", groupId: invite.groupId });

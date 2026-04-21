@@ -6,13 +6,12 @@ type Invite = {
   id: string;
   token: string;
   expiresAt: string;
-  usedBy: string | null;
-  usedAt: string | null;
-  usedByName: string | null;
+  maxUses: number;
+  usedCount: number;
 };
 
 function inviteStatus(invite: Invite): { label: string; className: string } {
-  if (invite.usedBy) {
+  if (invite.usedCount >= invite.maxUses) {
     return { label: "Использовано", className: "text-lumm-text-secondary" };
   }
   if (new Date(invite.expiresAt) < new Date()) {
@@ -38,12 +37,17 @@ function buildInviteUrl(token: string): string {
 
 export function InvitesClient({ initialInvites }: { initialInvites: Invite[] }) {
   const [invites, setInvites] = useState<Invite[]>(initialInvites);
+  const [maxUses, setMaxUses] = useState(1);
   const [creating, setCreating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const createInvite = async () => {
     setCreating(true);
-    const res = await fetch("/api/invites", { method: "POST" });
+    const res = await fetch("/api/invites", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ maxUses }),
+    });
     if (res.ok) {
       const data = await res.json();
       setInvites([
@@ -51,9 +55,8 @@ export function InvitesClient({ initialInvites }: { initialInvites: Invite[] }) 
           id: data.token,
           token: data.token,
           expiresAt: data.expiresAt,
-          usedBy: null,
-          usedAt: null,
-          usedByName: null,
+          maxUses: data.maxUses,
+          usedCount: 0,
         },
         ...invites,
       ]);
@@ -67,14 +70,36 @@ export function InvitesClient({ initialInvites }: { initialInvites: Invite[] }) 
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const deleteInvite = async (token: string) => {
+    if (!confirm("Удалить приглашение?")) return;
+    const res = await fetch(`/api/invites/${token}`, { method: "DELETE" });
+    if (res.ok) {
+      setInvites((prev) => prev.filter((i) => i.token !== token));
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-3xl font-bold text-lumm-text-primary">Приглашения</h1>
+        <p className="text-sm text-lumm-text-secondary mt-1">
+          Создавайте ссылки для приглашения новых участников
+        </p>
+      </div>
+
+      <div className="bg-lumm-black border border-lumm-gray-light rounded-xl p-4 flex flex-wrap items-end gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-lumm-text-primary">Приглашения</h1>
-          <p className="text-sm text-lumm-text-secondary mt-1">
-            Создавайте ссылки для приглашения новых участников
-          </p>
+          <label className="block text-sm text-lumm-text-secondary mb-1">
+            Лимит регистраций по ссылке
+          </label>
+          <input
+            type="number"
+            min={1}
+            max={100}
+            value={maxUses}
+            onChange={(e) => setMaxUses(Math.max(1, Math.min(100, Number(e.target.value) || 1)))}
+            className="w-32 bg-lumm-gray border border-lumm-gray-light rounded-lg px-3 py-2 text-lumm-text-primary focus:outline-none focus:border-lumm-gold"
+          />
         </div>
         <button
           onClick={createInvite}
@@ -96,13 +121,15 @@ export function InvitesClient({ initialInvites }: { initialInvites: Invite[] }) 
                   <th className="text-left px-4 py-3 font-normal">Статус</th>
                   <th className="text-left px-4 py-3 font-normal">Истекает</th>
                   <th className="text-left px-4 py-3 font-normal">Использовано</th>
-                  <th className="text-right px-4 py-3 font-normal">Ссылка</th>
+                  <th className="text-right px-4 py-3 font-normal">Действия</th>
                 </tr>
               </thead>
               <tbody>
                 {invites.map((invite) => {
                   const status = inviteStatus(invite);
-                  const canCopy = !invite.usedBy && new Date(invite.expiresAt) > new Date();
+                  const canCopy =
+                    invite.usedCount < invite.maxUses &&
+                    new Date(invite.expiresAt) > new Date();
                   return (
                     <tr
                       key={invite.id}
@@ -113,19 +140,25 @@ export function InvitesClient({ initialInvites }: { initialInvites: Invite[] }) 
                         {formatDate(invite.expiresAt)}
                       </td>
                       <td className="px-4 py-3 text-sm text-lumm-text-primary">
-                        {invite.usedByName || "—"}
+                        {invite.usedCount} / {invite.maxUses}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        {canCopy ? (
+                        <div className="flex justify-end gap-3">
+                          {canCopy && (
+                            <button
+                              onClick={() => copyLink(invite.token)}
+                              className="text-sm text-lumm-gold hover:text-lumm-gold-light"
+                            >
+                              {copiedId === invite.token ? "Скопировано!" : "Скопировать"}
+                            </button>
+                          )}
                           <button
-                            onClick={() => copyLink(invite.token)}
-                            className="text-sm text-lumm-gold hover:text-lumm-gold-light"
+                            onClick={() => deleteInvite(invite.token)}
+                            className="text-sm text-red-400 hover:text-red-300"
                           >
-                            {copiedId === invite.token ? "Скопировано!" : "Скопировать"}
+                            Удалить
                           </button>
-                        ) : (
-                          <span className="text-sm text-lumm-text-secondary">—</span>
-                        )}
+                        </div>
                       </td>
                     </tr>
                   );

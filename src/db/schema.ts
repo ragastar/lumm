@@ -29,6 +29,8 @@ export const invites = sqliteTable("invites", {
   token: text("token").notNull().unique(),
   createdBy: text("created_by").notNull().references(() => members.id),
   expiresAt: text("expires_at").notNull(),
+  maxUses: integer("max_uses").notNull().default(1),
+  usedCount: integer("used_count").notNull().default(0),
   usedBy: text("used_by").references(() => members.id),
   usedAt: text("used_at"),
 });

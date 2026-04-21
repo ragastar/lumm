@@ -22,7 +22,7 @@ export default async function InvitePage({
 
   if (result.length === 0) {
     errorMessage = "Приглашение не найдено";
-  } else if (result[0].usedBy) {
+  } else if (result[0].usedCount >= result[0].maxUses) {
     errorMessage = "Приглашение уже использовано";
   } else if (new Date(result[0].expiresAt) < new Date()) {
     errorMessage = "Приглашение истекло";
