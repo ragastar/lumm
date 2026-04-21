@@ -19,6 +19,8 @@ export const members = sqliteTable("members", {
   avatarUrl: text("avatar_url"),
   role: text("role", { enum: ["admin", "member"] }).notNull().default("member"),
   status: text("status", { enum: ["active", "inactive"] }).notNull().default("active"),
+  businessGoal: text("business_goal"),
+  sportGoal: text("sport_goal"),
   avatarColor: text("avatar_color").notNull().default("#c9a84c"),
   createdAt: text("created_at").notNull(),
 });
