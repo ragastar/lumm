@@ -8,7 +8,7 @@ import sharp from "sharp";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp"];
-const AVATARS_DIR = join(process.cwd(), "public", "avatars");
+const AVATARS_DIR = join(process.cwd(), "data", "avatars");
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
 
   await writeFile(filepath, processed);
 
-  const avatarUrl = `/avatars/${filename}?v=${Date.now()}`;
+  const avatarUrl = `/api/avatars/${filename}?v=${Date.now()}`;
 
   await db.update(members).set({ avatarUrl }).where(eq(members.id, user.id));
 
