@@ -16,6 +16,8 @@ type Props = {
     avatarUrl: string | null;
     role: string;
     hasPassword: boolean;
+    businessGoal: string | null;
+    sportGoal: string | null;
   };
 };
 
@@ -36,6 +38,11 @@ export function ProfileClient({ initial }: Props) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pwMsg, setPwMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [pwLoading, setPwLoading] = useState(false);
+
+  const [businessGoal, setBusinessGoal] = useState(initial.businessGoal ?? "");
+  const [sportGoal, setSportGoal] = useState(initial.sportGoal ?? "");
+  const [goalsMsg, setGoalsMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [goalsLoading, setGoalsLoading] = useState(false);
 
   const uploadAvatar = async (file: File) => {
     setAvatarMsg(null);
@@ -119,6 +126,28 @@ export function ProfileClient({ initial }: Props) {
     } else {
       const data = await res.json().catch(() => ({}));
       setPwMsg({ type: "err", text: data.error || "Ошибка" });
+    }
+  };
+
+  const saveGoals = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setGoalsMsg(null);
+    setGoalsLoading(true);
+    const res = await fetch("/api/auth/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        businessGoal: businessGoal.trim() || null,
+        sportGoal: sportGoal.trim() || null,
+      }),
+    });
+    setGoalsLoading(false);
+    if (res.ok) {
+      setGoalsMsg({ type: "ok", text: "Цели сохранены" });
+      router.refresh();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setGoalsMsg({ type: "err", text: data.error || "Ошибка сохранения" });
     }
   };
 
@@ -239,6 +268,54 @@ export function ProfileClient({ initial }: Props) {
         >
           {profileLoading ? "Сохранение..." : "Сохранить"}
         </button>
+      </form>
+
+      <form
+        onSubmit={saveGoals}
+        className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6 space-y-4"
+      >
+        <h2 className="text-lg font-semibold text-lumm-text-primary">Мои цели</h2>
+        <p className="text-sm text-lumm-text-secondary">
+          Эти цели видны другим участникам группы. Бот сверяет с ними твои еженедельные отчёты.
+        </p>
+        <div>
+          <label className="block text-sm text-lumm-text-secondary mb-1">Бизнес-цель</label>
+          <textarea
+            value={businessGoal}
+            onChange={(e) => setBusinessGoal(e.target.value)}
+            rows={3}
+            maxLength={500}
+            className="w-full bg-lumm-gray-dark border border-lumm-gray-light rounded-lg p-3 text-lumm-text-primary"
+            placeholder="Например: запустить новый продукт, выйти на выручку X"
+          />
+          <p className="text-xs text-lumm-text-secondary mt-1">{businessGoal.length}/500</p>
+        </div>
+        <div>
+          <label className="block text-sm text-lumm-text-secondary mb-1">Спортивная цель</label>
+          <textarea
+            value={sportGoal}
+            onChange={(e) => setSportGoal(e.target.value)}
+            rows={3}
+            maxLength={500}
+            className="w-full bg-lumm-gray-dark border border-lumm-gray-light rounded-lg p-3 text-lumm-text-primary"
+            placeholder="Например: полумарафон за 1:45, подтягивания 15 раз"
+          />
+          <p className="text-xs text-lumm-text-secondary mt-1">{sportGoal.length}/500</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            type="submit"
+            disabled={goalsLoading}
+            className="bg-lumm-gold text-lumm-black font-medium px-4 py-2 rounded-lg disabled:opacity-50"
+          >
+            {goalsLoading ? "Сохраняю..." : "Сохранить цели"}
+          </button>
+          {goalsMsg && (
+            <span className={`text-sm ${goalsMsg.type === "ok" ? "text-green-400" : "text-red-400"}`}>
+              {goalsMsg.text}
+            </span>
+          )}
+        </div>
       </form>
 
       {initial.hasPassword && (

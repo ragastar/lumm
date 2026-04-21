@@ -18,6 +18,8 @@ export default async function ProfilePage() {
         avatarUrl: user.avatarUrl,
         role: user.role,
         hasPassword: !!user.passwordHash,
+        businessGoal: user.businessGoal,
+        sportGoal: user.sportGoal,
       }}
     />
   );
