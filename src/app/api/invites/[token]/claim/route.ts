@@ -4,7 +4,6 @@ import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
 import { signJWT } from "@/lib/jwt";
-import { verifyTelegramLogin } from "@/lib/telegram";
 import { cookies } from "next/headers";
 
 export async function POST(
@@ -34,71 +33,37 @@ export async function POST(
   }
 
   const body = await request.json();
-  const { method } = body;
+  const { username, password } = body;
+
+  if (!username || !password || password.length < 6) {
+    return Response.json({ error: "Логин и пароль (мин. 6 символов) обязательны" }, { status: 400 });
+  }
+
+  const existing = await db
+    .select()
+    .from(members)
+    .where(eq(members.username, username))
+    .limit(1);
+
+  if (existing.length > 0) {
+    return Response.json({ error: "Этот логин уже занят" }, { status: 409 });
+  }
 
   const memberId = randomUUID();
   const now = new Date().toISOString();
+  const passwordHash = bcrypt.hashSync(password, 10);
 
-  if (method === "telegram") {
-    if (!verifyTelegramLogin(body.telegramData)) {
-      return Response.json({ error: "Невалидные данные Telegram" }, { status: 401 });
-    }
-
-    const telegramId = String(body.telegramData.id);
-
-    const existing = await db
-      .select()
-      .from(members)
-      .where(eq(members.telegramId, telegramId))
-      .limit(1);
-
-    if (existing.length > 0) {
-      return Response.json({ error: "Этот Telegram аккаунт уже зарегистрирован" }, { status: 409 });
-    }
-
-    await db.insert(members).values({
-      id: memberId,
-      groupId: invite.groupId,
-      telegramId,
-      displayName: body.telegramData.first_name || "Участник",
-      role: "member",
-      status: "active",
-      avatarColor: "#c9a84c",
-      createdAt: now,
-    });
-  } else if (method === "password") {
-    const { username, password } = body;
-
-    if (!username || !password || password.length < 6) {
-      return Response.json({ error: "Логин и пароль (мин. 6 символов) обязательны" }, { status: 400 });
-    }
-
-    const existing = await db
-      .select()
-      .from(members)
-      .where(eq(members.username, username))
-      .limit(1);
-
-    if (existing.length > 0) {
-      return Response.json({ error: "Этот логин уже занят" }, { status: 409 });
-    }
-
-    const passwordHash = bcrypt.hashSync(password, 10);
-
-    await db.insert(members).values({
-      id: memberId,
-      groupId: invite.groupId,
-      username,
-      passwordHash,
-      displayName: username,
-      role: "member",
-      status: "active",
-      avatarColor: "#c9a84c",
-      createdAt: now,
-    });
-  } else {
-    return Response.json({ error: "Неверный метод регистрации" }, { status: 400 });
-  }
+  await db.insert(members).values({
+    id: memberId,
+    groupId: invite.groupId,
+    username,
+    passwordHash,
+    displayName: username,
+    role: "member",
+    status: "active",
+    avatarColor: "#c9a84c",
+    createdAt: now,
+  });
 
   await db
     .update(invites)

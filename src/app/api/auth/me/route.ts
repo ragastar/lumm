@@ -14,6 +14,5 @@ export async function GET() {
     avatarColor: user.avatarColor,
     avatarUrl: user.avatarUrl,
     groupId: user.groupId,
-    telegramId: user.telegramId,
   });
 }

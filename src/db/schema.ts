@@ -35,17 +35,6 @@ export const invites = sqliteTable("invites", {
   usedAt: text("used_at"),
 });
 
-export const loginNonces = sqliteTable("login_nonces", {
-  nonce: text("nonce").primaryKey(),
-  purpose: text("purpose", { enum: ["login", "invite"] }).notNull(),
-  inviteToken: text("invite_token"),
-  status: text("status", { enum: ["pending", "confirmed"] }).notNull().default("pending"),
-  memberId: text("member_id").references(() => members.id),
-  telegramId: text("telegram_id"),
-  expiresAt: text("expires_at").notNull(),
-  createdAt: text("created_at").notNull(),
-});
-
 export const weeklyReports = sqliteTable("weekly_reports", {
   id: text("id").primaryKey(),
   memberId: text("member_id").notNull().references(() => members.id),

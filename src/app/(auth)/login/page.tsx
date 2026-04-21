@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { TelegramBotLogin } from "@/components/TelegramBotLogin";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,20 +43,6 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-lumm-gold tracking-wider">LUMM</h1>
           <p className="text-sm text-lumm-text-secondary mt-1">Level Up Mastermind</p>
-        </div>
-
-        <TelegramBotLogin
-          purpose="login"
-          onSuccess={(needsOnboarding) =>
-            router.push(needsOnboarding ? "/onboard" : "/")
-          }
-          onError={(e) => setError(e)}
-        />
-
-        <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-lumm-gray-light" />
-          <span className="text-xs text-lumm-text-secondary">или логин и пароль</span>
-          <div className="flex-1 h-px bg-lumm-gray-light" />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

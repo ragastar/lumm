@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Member = {
@@ -8,15 +8,11 @@ type Member = {
   displayName: string;
   role: string;
   avatarColor: string;
-  telegramId: string | null;
 };
 
 export function UserMenu() {
   const [current, setCurrent] = useState<Member | null>(null);
   const [open, setOpen] = useState(false);
-  const [linkMode, setLinkMode] = useState(false);
-  const [linkStatus, setLinkStatus] = useState<string | null>(null);
-  const widgetRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -24,47 +20,6 @@ export function UserMenu() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => setCurrent(data));
   }, []);
-
-  useEffect(() => {
-    if (!linkMode) return;
-    const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
-    if (!botUsername || !widgetRef.current) return;
-
-    (window as unknown as Record<string, unknown>).onTelegramLink = async (
-      user: Record<string, unknown>,
-    ) => {
-      setLinkStatus("Привязываю...");
-      const res = await fetch("/api/auth/link-telegram", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(user),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setLinkStatus("Telegram привязан");
-        setCurrent((prev) => (prev ? { ...prev, telegramId: String(user.id) } : prev));
-        setTimeout(() => {
-          setLinkMode(false);
-          setLinkStatus(null);
-          setOpen(false);
-        }, 1500);
-      } else {
-        setLinkStatus(data.error || "Ошибка привязки");
-      }
-    };
-
-    if (!widgetRef.current.hasChildNodes()) {
-      const script = document.createElement("script");
-      script.src = "https://telegram.org/js/telegram-widget.js?22";
-      script.setAttribute("data-telegram-login", botUsername);
-      script.setAttribute("data-size", "medium");
-      script.setAttribute("data-radius", "8");
-      script.setAttribute("data-onauth", "onTelegramLink(user)");
-      script.setAttribute("data-request-access", "write");
-      script.async = true;
-      widgetRef.current.appendChild(script);
-    }
-  }, [linkMode]);
 
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -74,7 +29,6 @@ export function UserMenu() {
   if (!current) return null;
 
   const isAdmin = current.role === "admin";
-  const hasTelegram = !!current.telegramId;
 
   return (
     <div className="relative">
@@ -97,31 +51,26 @@ export function UserMenu() {
       {open && (
         <div className="absolute bottom-full left-0 w-full mb-2 bg-lumm-gray border border-lumm-gray-light rounded-lg shadow-xl overflow-hidden z-50">
           {isAdmin && (
-            <button
-              onClick={() => {
-                setOpen(false);
-                router.push("/admin/invites");
-              }}
-              className="w-full text-left px-3 py-2 text-sm text-lumm-text-primary hover:bg-lumm-gray-light transition-colors"
-            >
-              Приглашения
-            </button>
-          )}
-          {!hasTelegram && !linkMode && (
-            <button
-              onClick={() => setLinkMode(true)}
-              className="w-full text-left px-3 py-2 text-sm text-lumm-text-primary hover:bg-lumm-gray-light transition-colors"
-            >
-              Привязать Telegram
-            </button>
-          )}
-          {linkMode && (
-            <div className="px-3 py-3 flex flex-col items-center gap-2">
-              <div ref={widgetRef} />
-              {linkStatus && (
-                <p className="text-xs text-lumm-text-secondary">{linkStatus}</p>
-              )}
-            </div>
+            <>
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  router.push("/admin/invites");
+                }}
+                className="w-full text-left px-3 py-2 text-sm text-lumm-text-primary hover:bg-lumm-gray-light transition-colors"
+              >
+                Приглашения
+              </button>
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  router.push("/admin/members");
+                }}
+                className="w-full text-left px-3 py-2 text-sm text-lumm-text-primary hover:bg-lumm-gray-light transition-colors"
+              >
+                Участники
+              </button>
+            </>
           )}
           <button
             onClick={logout}
