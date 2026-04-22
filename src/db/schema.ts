@@ -48,6 +48,7 @@ export const weeklyReports = sqliteTable("weekly_reports", {
   scoreFamily: integer("score_family"),
   scorePersonal: integer("score_personal"),
   planText: text("plan_text"),
+  rawText: text("raw_text"),
   source: text("source", { enum: ["telegram", "web"] }).notNull().default("web"),
   createdAt: text("created_at").notNull(),
 });
@@ -74,5 +75,17 @@ export const meetings = sqliteTable("meetings", {
   organizerId: text("organizer_id").references(() => members.id),
   location: text("location"),
   status: text("status", { enum: ["scheduled", "completed", "cancelled"] }).notNull().default("scheduled"),
+  createdAt: text("created_at").notNull(),
+});
+
+export const reportAnalyses = sqliteTable("report_analyses", {
+  id: text("id").primaryKey(),
+  reportId: text("report_id").notNull().unique().references(() => weeklyReports.id),
+  trafficLight: text("traffic_light", { enum: ["green", "yellow", "red"] }).notNull(),
+  did: text("did").notNull(),
+  missed: text("missed").notNull(),
+  nextQuestion: text("next_question").notNull(),
+  coach: text("coach").notNull(),
+  model: text("model").notNull(),
   createdAt: text("created_at").notNull(),
 });
