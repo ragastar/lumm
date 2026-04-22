@@ -17,10 +17,22 @@ function formatDate(iso: string): string {
   });
 }
 
-const LIGHT_BADGE: Record<string, { label: string; color: string }> = {
-  green: { label: "🟢 Движется", color: "bg-green-500/10 text-green-400 border-green-500/30" },
-  yellow: { label: "🟡 Частично", color: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30" },
-  red: { label: "🔴 Застрял", color: "bg-red-500/10 text-red-400 border-red-500/30" },
+const LIGHT_BADGE: Record<string, { label: string; color: string; hint: string }> = {
+  green: {
+    label: "🟢 Движется",
+    color: "bg-green-500/10 text-green-400 border-green-500/30",
+    hint: "Явное движение и к бизнес-, и к спорт-цели за эту неделю",
+  },
+  yellow: {
+    label: "🟡 Частично движется",
+    color: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
+    hint: "Движение в одной из двух целей, или символическое в обеих",
+  },
+  red: {
+    label: "🔴 Застрял",
+    color: "bg-red-500/10 text-red-400 border-red-500/30",
+    hint: "Нет движения к целям или участник буксует",
+  },
 };
 
 export default async function ReportDetailPage({
@@ -90,9 +102,17 @@ export default async function ReportDetailPage({
           <p className="text-sm text-lumm-text-secondary">{formatDate(r.createdAt)}</p>
         </div>
         {badge ? (
-          <span className={`px-3 py-1 rounded-full text-sm border ${badge.color}`}>{badge.label}</span>
+          <span
+            title={badge.hint}
+            className={`px-3 py-1 rounded-full text-sm border ${badge.color}`}
+          >
+            {badge.label}
+          </span>
         ) : (
-          <span className="px-3 py-1 rounded-full text-sm border bg-lumm-gray-light/10 text-lumm-text-secondary border-lumm-gray-light">
+          <span
+            title="Автоматический анализ не удался — попробуем ещё раз позже"
+            className="px-3 py-1 rounded-full text-sm border bg-lumm-gray-light/10 text-lumm-text-secondary border-lumm-gray-light"
+          >
             Без анализа
           </span>
         )}

@@ -12,10 +12,22 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
-const LIGHT_BADGE: Record<string, { label: string; color: string }> = {
-  green: { label: "🟢", color: "bg-green-500/10 text-green-400 border-green-500/30" },
-  yellow: { label: "🟡", color: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30" },
-  red: { label: "🔴", color: "bg-red-500/10 text-red-400 border-red-500/30" },
+const LIGHT_BADGE: Record<string, { label: string; color: string; hint: string }> = {
+  green: {
+    label: "🟢 Движется",
+    color: "bg-green-500/10 text-green-400 border-green-500/30",
+    hint: "Явное движение и к бизнес-, и к спорт-цели за эту неделю",
+  },
+  yellow: {
+    label: "🟡 Частично движется",
+    color: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
+    hint: "Движение в одной из двух целей, или символическое в обеих",
+  },
+  red: {
+    label: "🔴 Застрял",
+    color: "bg-red-500/10 text-red-400 border-red-500/30",
+    hint: "Нет движения к целям или участник буксует",
+  },
 };
 
 function truncate(s: string | null, n: number): string {
@@ -79,9 +91,17 @@ export default async function ReportsPage() {
                       <span className="font-medium text-lumm-text-primary">{r.displayName}</span>
                       <span className="text-xs text-lumm-text-secondary">{formatDate(r.createdAt)}</span>
                       {badge ? (
-                        <span className={`px-2 py-0.5 rounded-full text-xs border ${badge.color}`}>{badge.label}</span>
+                        <span
+                          title={badge.hint}
+                          className={`px-2 py-0.5 rounded-full text-xs border ${badge.color}`}
+                        >
+                          {badge.label}
+                        </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full text-xs border bg-lumm-gray-light/10 text-lumm-text-secondary border-lumm-gray-light">
+                        <span
+                          title="Автоматический анализ не удался — посмотри отчёт вручную"
+                          className="px-2 py-0.5 rounded-full text-xs border bg-lumm-gray-light/10 text-lumm-text-secondary border-lumm-gray-light"
+                        >
                           без анализа
                         </span>
                       )}
