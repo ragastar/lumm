@@ -70,8 +70,11 @@ sqlite.exec(`
     score_personal INTEGER,
     report_text TEXT,
     request_text TEXT,
-    created_at TEXT NOT NULL
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
+  CREATE UNIQUE INDEX IF NOT EXISTS uniq_monthly_member_month
+    ON monthly_financials(member_id, month);
   CREATE TABLE IF NOT EXISTS meetings (
     id TEXT PRIMARY KEY,
     group_id TEXT NOT NULL REFERENCES groups(id),

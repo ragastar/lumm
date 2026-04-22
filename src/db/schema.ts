@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const groups = sqliteTable("groups", {
   id: text("id").primaryKey(),
@@ -53,20 +53,27 @@ export const weeklyReports = sqliteTable("weekly_reports", {
   createdAt: text("created_at").notNull(),
 });
 
-export const monthlyFinancials = sqliteTable("monthly_financials", {
-  id: text("id").primaryKey(),
-  memberId: text("member_id").notNull().references(() => members.id),
-  month: text("month").notNull(),
-  revenue: real("revenue"),
-  netProfit: real("net_profit"),
-  capital: real("capital"),
-  scoreBusiness: integer("score_business"),
-  scoreFamily: integer("score_family"),
-  scorePersonal: integer("score_personal"),
-  reportText: text("report_text"),
-  requestText: text("request_text"),
-  createdAt: text("created_at").notNull(),
-});
+export const monthlyFinancials = sqliteTable(
+  "monthly_financials",
+  {
+    id: text("id").primaryKey(),
+    memberId: text("member_id").notNull().references(() => members.id),
+    month: text("month").notNull(),
+    revenue: real("revenue"),
+    netProfit: real("net_profit"),
+    capital: real("capital"),
+    scoreBusiness: integer("score_business"),
+    scoreFamily: integer("score_family"),
+    scorePersonal: integer("score_personal"),
+    reportText: text("report_text"),
+    requestText: text("request_text"),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (table) => ({
+    memberMonthUniq: uniqueIndex("uniq_monthly_member_month").on(table.memberId, table.month),
+  }),
+);
 
 export const meetings = sqliteTable("meetings", {
   id: text("id").primaryKey(),

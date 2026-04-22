@@ -56,6 +56,7 @@ export async function POST(request: Request) {
     reportText: body.reportText ?? null,
     requestText: body.requestText ?? null,
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 
   await db.insert(monthlyFinancials).values(record);
