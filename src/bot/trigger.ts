@@ -1,5 +1,6 @@
 const MENTION = /@lummbrain_bot/i;
-const PHRASE = /еженедельн[ыо]й\s+отч[её]т/i;
+const ADJECTIVE = "(?:еженедельн|ежемесячн|кварталь|ежеквартальн|месячн|годов)[а-яё]*";
+const PHRASE = new RegExp(`(?:${ADJECTIVE}\\s+)?отч[её]т`, "i");
 
 export function matchTrigger(text: string): string | null {
   if (!text) return null;

@@ -22,6 +22,16 @@ describe("matchTrigger", () => {
     expect(matchTrigger("@lummbrain_bot еженедельный отчёт текст")).toBe("текст");
   });
 
+  it("accepts just отчёт without adjective", () => {
+    expect(matchTrigger("@lummbrain_bot Отчёт: закрыл сделки")).toBe("закрыл сделки");
+    expect(matchTrigger("@lummbrain_bot отчет — три пробежки")).toBe("три пробежки");
+  });
+
+  it("accepts квартальный and другие прилагательные", () => {
+    expect(matchTrigger("@lummbrain_bot квартальный отчёт текст")).toBe("текст");
+    expect(matchTrigger("@lummbrain_bot ежемесячный отчёт текст")).toBe("текст");
+  });
+
   it("returns null when mention is absent", () => {
     expect(matchTrigger("Еженедельный отчёт: без бота")).toBeNull();
   });
