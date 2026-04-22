@@ -129,22 +129,26 @@ export function FinancialsClient({ member, financials }: Props) {
       requestText: form.requestText || null,
     };
 
-    const res = await fetch("/api/monthly-financials", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch("/api/monthly-financials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    setSubmitting(false);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: "Ошибка сервера" }));
+        setError(data.error ?? "Ошибка сервера");
+        return;
+      }
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({ error: "Ошибка сервера" }));
-      setError(data.error ?? "Ошибка сервера");
-      return;
+      setShowForm(false);
+      router.refresh();
+    } catch {
+      setError("Ошибка соединения");
+    } finally {
+      setSubmitting(false);
     }
-
-    setShowForm(false);
-    router.refresh();
   };
 
   const revenueData = [...financials].reverse().map((f) => f.revenue ?? 0);
@@ -161,6 +165,17 @@ export function FinancialsClient({ member, financials }: Props) {
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((prev) => ({ ...prev, [key]: e.target.value }));
 
+  const handleToggleForm = () => {
+    if (showForm) {
+      // Closing — reset state
+      setMonth(currentMonthIso());
+      setForm(EMPTY_FORM);
+      setExisting(null);
+      setError(null);
+    }
+    setShowForm(!showForm);
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -171,7 +186,7 @@ export function FinancialsClient({ member, financials }: Props) {
           </p>
         </div>
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={handleToggleForm}
           className="px-4 py-2 bg-lumm-gold text-lumm-dark font-medium rounded-lg hover:bg-lumm-gold-light transition-colors"
         >
           {showForm ? "Отмена" : "Новый отчёт"}
@@ -245,6 +260,7 @@ export function FinancialsClient({ member, financials }: Props) {
                 type="number"
                 min="1"
                 max="10"
+                step="1"
                 required
                 value={form.scoreBusiness}
                 onChange={updateField("scoreBusiness")}
@@ -257,6 +273,7 @@ export function FinancialsClient({ member, financials }: Props) {
                 type="number"
                 min="1"
                 max="10"
+                step="1"
                 required
                 value={form.scoreFamily}
                 onChange={updateField("scoreFamily")}
@@ -269,6 +286,7 @@ export function FinancialsClient({ member, financials }: Props) {
                 type="number"
                 min="1"
                 max="10"
+                step="1"
                 required
                 value={form.scorePersonal}
                 onChange={updateField("scorePersonal")}
