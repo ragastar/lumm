@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { members, weeklyReports, reportAnalyses } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { Avatar } from "@/components/Avatar";
+import { DeleteReportButton } from "./DeleteReportButton";
 
 export const dynamic = "force-dynamic";
 
@@ -63,12 +64,15 @@ export default async function ReportDetailPage({
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <Link
-        href="/reports"
-        className="inline-flex items-center gap-2 text-sm text-lumm-text-secondary hover:text-lumm-text-primary"
-      >
-        ← К ленте отчётов
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link
+          href="/reports"
+          className="inline-flex items-center gap-2 text-sm text-lumm-text-secondary hover:text-lumm-text-primary"
+        >
+          ← К ленте отчётов
+        </Link>
+        {user.role === "admin" && <DeleteReportButton reportId={r.reportId} />}
+      </div>
 
       <div className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6 flex items-center gap-4">
         <Link href={`/members/${r.memberId}`}>
