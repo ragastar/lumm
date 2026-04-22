@@ -1,28 +1,18 @@
-import { db } from "@/db";
-import { members } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { getCurrentMemberId } from "@/lib/session";
+import { getCurrentUser } from "@/lib/session";
 
 export async function GET() {
-  const memberId = await getCurrentMemberId();
+  const user = await getCurrentUser();
 
-  if (memberId) {
-    const member = await db
-      .select()
-      .from(members)
-      .where(eq(members.id, memberId));
-
-    if (member.length > 0) {
-      return Response.json(member[0]);
-    }
+  if (!user) {
+    return Response.json({ error: "Не авторизован" }, { status: 401 });
   }
 
-  // No cookie or member not found — return first member as default
-  const firstMember = await db.select().from(members).limit(1);
-
-  if (firstMember.length === 0) {
-    return Response.json({ error: "No members found" }, { status: 404 });
-  }
-
-  return Response.json(firstMember[0]);
+  return Response.json({
+    id: user.id,
+    displayName: user.displayName,
+    role: user.role,
+    avatarColor: user.avatarColor,
+    avatarUrl: user.avatarUrl,
+    groupId: user.groupId,
+  });
 }

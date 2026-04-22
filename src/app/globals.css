@@ -5,3 +5,9 @@
 body {
   @apply bg-lumm-dark text-lumm-text-primary font-sans;
 }
+
+button:not(:disabled),
+[role="button"]:not(:disabled),
+a {
+  cursor: pointer;
+}
