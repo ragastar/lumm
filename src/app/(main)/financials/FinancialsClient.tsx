@@ -142,7 +142,7 @@ export function FinancialsClient({ member, financials }: Props) {
         return;
       }
 
-      setShowForm(false);
+      handleToggleForm();
       router.refresh();
     } catch {
       setError("Ошибка соединения");

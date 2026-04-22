@@ -65,48 +65,6 @@ export async function POST(request: Request) {
 
   const now = new Date().toISOString();
 
-  const existing = await db
-    .select({ id: monthlyFinancials.id, createdAt: monthlyFinancials.createdAt })
-    .from(monthlyFinancials)
-    .where(and(eq(monthlyFinancials.memberId, memberId), eq(monthlyFinancials.month, v.month)))
-    .limit(1);
-
-  if (existing.length > 0) {
-    await db
-      .update(monthlyFinancials)
-      .set({
-        revenue: v.revenue,
-        netProfit: v.netProfit,
-        capital: v.capital,
-        scoreBusiness: v.scoreBusiness,
-        scoreFamily: v.scoreFamily,
-        scorePersonal: v.scorePersonal,
-        reportText: v.reportText,
-        requestText: v.requestText,
-        updatedAt: now,
-      })
-      .where(eq(monthlyFinancials.id, existing[0].id));
-
-    return Response.json(
-      {
-        id: existing[0].id,
-        memberId,
-        month: v.month,
-        revenue: v.revenue,
-        netProfit: v.netProfit,
-        capital: v.capital,
-        scoreBusiness: v.scoreBusiness,
-        scoreFamily: v.scoreFamily,
-        scorePersonal: v.scorePersonal,
-        reportText: v.reportText,
-        requestText: v.requestText,
-        createdAt: existing[0].createdAt,
-        updatedAt: now,
-      },
-      { status: 200 },
-    );
-  }
-
   const record = {
     id: randomUUID(),
     memberId,
@@ -122,6 +80,30 @@ export async function POST(request: Request) {
     createdAt: now,
     updatedAt: now,
   };
-  await db.insert(monthlyFinancials).values(record);
-  return Response.json(record, { status: 200 });
+
+  await db
+    .insert(monthlyFinancials)
+    .values(record)
+    .onConflictDoUpdate({
+      target: [monthlyFinancials.memberId, monthlyFinancials.month],
+      set: {
+        revenue: v.revenue,
+        netProfit: v.netProfit,
+        capital: v.capital,
+        scoreBusiness: v.scoreBusiness,
+        scoreFamily: v.scoreFamily,
+        scorePersonal: v.scorePersonal,
+        reportText: v.reportText,
+        requestText: v.requestText,
+        updatedAt: now,
+      },
+    });
+
+  const [saved] = await db
+    .select()
+    .from(monthlyFinancials)
+    .where(and(eq(monthlyFinancials.memberId, memberId), eq(monthlyFinancials.month, v.month)))
+    .limit(1);
+
+  return Response.json(saved, { status: 200 });
 }
