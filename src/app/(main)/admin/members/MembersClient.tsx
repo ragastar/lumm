@@ -10,6 +10,7 @@ type Member = {
   status: string;
   avatarColor: string;
   createdAt: string;
+  telegramId: string | null;
 };
 
 function formatDate(iso: string): string {
@@ -33,6 +34,8 @@ export function MembersClient({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [activating, setActivating] = useState(false);
+  const [tgDrafts, setTgDrafts] = useState<Record<string, string>>({});
+  const [tgBusy, setTgBusy] = useState<string | null>(null);
 
   const resetPassword = async (member: Member) => {
     setBusyId(member.id);
@@ -96,6 +99,24 @@ export function MembersClient({
     }
   };
 
+  const saveTelegramId = async (memberId: string) => {
+    const draft = tgDrafts[memberId] ?? "";
+    setTgBusy(memberId);
+    const res = await fetch(`/api/admin/members/${memberId}/telegram-id`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ telegramId: draft.trim() || null }),
+    });
+    setTgBusy(null);
+    if (res.ok) {
+      alert("Telegram ID сохранён");
+      location.reload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Ошибка: ${data.error || res.statusText}`);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -124,6 +145,7 @@ export function MembersClient({
                 <th className="text-left px-4 py-3 font-normal">Роль</th>
                 <th className="text-left px-4 py-3 font-normal">Статус</th>
                 <th className="text-left px-4 py-3 font-normal">Создан</th>
+                <th className="text-left p-3 text-sm text-lumm-text-secondary">Telegram ID</th>
                 <th className="text-right px-4 py-3 font-normal">Действия</th>
               </tr>
             </thead>
@@ -163,6 +185,24 @@ export function MembersClient({
                     <td className="px-4 py-3 text-sm text-lumm-text-primary">
                       {formatDate(m.createdAt)}
                     </td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          defaultValue={m.telegramId ?? ""}
+                          onChange={(e) => setTgDrafts({ ...tgDrafts, [m.id]: e.target.value })}
+                          placeholder="напр. 123456789"
+                          className="bg-lumm-gray-dark border border-lumm-gray-light rounded px-2 py-1 text-sm w-36"
+                        />
+                        <button
+                          onClick={() => saveTelegramId(m.id)}
+                          disabled={tgBusy === m.id}
+                          className="text-xs bg-lumm-gray-light px-2 py-1 rounded disabled:opacity-50"
+                        >
+                          {tgBusy === m.id ? "..." : "✓"}
+                        </button>
+                      </div>
+                    </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-3">
                         {m.username && (
@@ -192,6 +232,10 @@ export function MembersClient({
           </table>
         </div>
       </div>
+
+      <p className="text-xs text-lumm-text-secondary">
+        Чтобы узнать свой Telegram ID — напиши в Telegram боту <code className="text-lumm-gold">@userinfobot</code>, он ответит числом.
+      </p>
 
       {resetMember && newPassword && (
         <div
