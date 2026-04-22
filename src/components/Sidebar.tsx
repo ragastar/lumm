@@ -15,8 +15,8 @@ type NavItem = {
 
 const activeNav: NavItem[] = [
   { href: "/", label: "Dashboard", icon: "◆" },
-  { href: "/reports", label: "Отчёты", icon: "◇" },
-  { href: "/financials", label: "Финансы", icon: "◈" },
+  { href: "/reports", label: "Еженедельные", icon: "◇" },
+  { href: "/financials", label: "Ежемесячные", icon: "◈" },
   { href: "/analytics", label: "Аналитика", icon: "◈" },
   { href: "/calendar", label: "Календарь", icon: "◎" },
   { href: "/members", label: "Участники", icon: "◐", badge: "NEW" },

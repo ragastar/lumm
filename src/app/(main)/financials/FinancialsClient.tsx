@@ -180,10 +180,8 @@ export function FinancialsClient({ member, financials }: Props) {
     <div className="max-w-6xl mx-auto space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Финансы</h1>
-          <p className="text-lumm-text-secondary mt-1">
-            Ежемесячные отчёты — {member.displayName}
-          </p>
+          <h1 className="text-3xl font-bold">Ежемесячные отчёты</h1>
+          <p className="text-lumm-text-secondary mt-1">{member.displayName}</p>
         </div>
         <button
           onClick={handleToggleForm}

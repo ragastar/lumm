@@ -59,7 +59,7 @@ export default async function ReportsPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-lumm-text-primary">Отчёты</h1>
+        <h1 className="text-3xl font-bold text-lumm-text-primary">Еженедельные отчёты</h1>
         <p className="text-sm text-lumm-text-secondary mt-1">
           {rows.length} {rows.length === 1 ? "отчёт" : "отчётов"} в группе
         </p>

@@ -125,7 +125,7 @@ export default async function HelpPage() {
       <section className="bg-lumm-black border border-lumm-gray-light/50 rounded-xl p-6 space-y-3">
         <h2 className="text-xl font-semibold text-lumm-text-primary">5. Ежемесячный отчёт</h2>
         <p className="text-sm text-lumm-text-secondary">
-          Каждый участник сдаёт отчёт раз в месяц через страницу <strong>Финансы</strong>.
+          Каждый участник сдаёт отчёт раз в месяц через вкладку <strong>Ежемесячные</strong>.
         </p>
         <div className="text-sm text-lumm-text-secondary space-y-1">
           <p><strong>Что указываем:</strong></p>
