@@ -121,13 +121,28 @@ export default async function HelpPage() {
         </p>
       </section>
 
-      {/* Ежемесячный отчёт — placeholder */}
-      <section className="bg-lumm-black border border-lumm-gray-light/50 rounded-xl p-6 space-y-2 opacity-60">
+      {/* Ежемесячный отчёт */}
+      <section className="bg-lumm-black border border-lumm-gray-light/50 rounded-xl p-6 space-y-3">
         <h2 className="text-xl font-semibold text-lumm-text-primary">5. Ежемесячный отчёт</h2>
         <p className="text-sm text-lumm-text-secondary">
-          Раздел в разработке. Месячные отчёты заполняются формой в вебе: выручка, чистая прибыль, оценки по трём
-          сферам (Б/С/Л), текст по сферам. В квартальные месяцы (март, июнь, сентябрь, декабрь) — активируется
-          дополнительное поле «Капитал».
+          Каждый участник сдаёт отчёт раз в месяц через страницу <strong>Финансы</strong>.
+        </p>
+        <div className="text-sm text-lumm-text-secondary space-y-1">
+          <p><strong>Что указываем:</strong></p>
+          <ul className="list-disc list-inside space-y-1 pl-2">
+            <li>Выручка (валовая) и чистая прибыль за месяц, ₽</li>
+            <li>Оценки по сферам: Бизнес / Семья / Личное (1-10)</li>
+            <li>Текст отчёта по сферам</li>
+            <li>Запрос на разбор (если есть)</li>
+          </ul>
+        </div>
+        <p className="text-sm text-lumm-text-secondary">
+          <strong>Капитал</strong> сдаём только в конце квартала — в марте, июне, сентябре и декабре. В эти
+          месяцы поле обязательное. В остальные — оно скрыто.
+        </p>
+        <p className="text-sm text-lumm-text-secondary">
+          <strong>Редактировать</strong> можно в любой момент: сохраняешь заново, запись обновляется.
+          Финалом считается последняя сохранённая версия.
         </p>
       </section>
     </div>
