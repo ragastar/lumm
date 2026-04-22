@@ -1,4 +1,5 @@
 import { Bot } from "grammy";
+import { handleReport } from "./handleReport";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 if (!token) {
@@ -6,12 +7,35 @@ if (!token) {
   process.exit(1);
 }
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://lumm.space";
+
 const bot = new Bot(token);
 
-bot.command("start", (ctx) => ctx.reply("LUMM Bot запущен! 🏆"));
+bot.command("start", (ctx) => ctx.reply("LUMM Bot запущен. Пиши еженедельные отчёты в группе."));
+
+bot.on("message:text", async (ctx) => {
+  if (!ctx.from?.id) return;
+  try {
+    await handleReport({
+      text: ctx.message.text,
+      fromId: String(ctx.from.id),
+      reply: async (msg) => {
+        await ctx.reply(msg, { reply_parameters: { message_id: ctx.message.message_id } });
+      },
+      baseUrl,
+    });
+  } catch (err) {
+    console.error("[bot] handleReport crashed:", err);
+    try {
+      await ctx.reply("Что-то пошло не так. Попробуй через минуту.");
+    } catch {
+      /* swallow — уже упали */
+    }
+  }
+});
 
 bot.catch((err) => {
-  console.error("Bot error:", err);
+  console.error("[bot] grammy error:", err);
 });
 
 bot.start({
