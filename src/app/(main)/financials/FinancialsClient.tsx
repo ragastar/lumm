@@ -100,6 +100,7 @@ export function FinancialsClient({ member, financials }: Props) {
         if (!r.ok) return null;
         return (await r.json()) as Financial | null;
       })
+      .catch(() => null)
       .then((record) => {
         if (cancelled) return;
         setError(null);
@@ -188,7 +189,6 @@ export function FinancialsClient({ member, financials }: Props) {
             <div>
               <label className="block text-sm text-lumm-text-secondary mb-1">Месяц</label>
               <input
-                name="month"
                 type="month"
                 required
                 value={toMonthInput(month)}
