@@ -34,7 +34,7 @@
 | Слой | Изменение |
 |---|---|
 | БД | Миграция: `UNIQUE(member_id, month)` + `updated_at` |
-| API | `POST /api/monthly-financials`: `memberId` из JWT, upsert, серверная валидация квартала |
+| API | `POST /api/monthly-financials`: `memberId` из JWT, upsert, inline-валидация полей и квартала |
 | API | Новый `GET /api/monthly-financials/me?month=YYYY-MM-01` для edit-flow |
 | Lib | Новый `src/lib/quarter.ts` — single source of truth для правила «квартальный месяц» |
 | UI | `FinancialsClient.tsx`: edit-flow, квартал-скрытие поля, refetch при смене месяца |
@@ -73,7 +73,7 @@ monthly_financials:
 
 **Auth:** обязательна сессия (JWT из cookie). Без сессии → 401. `memberId` берётся из сессии, поле в теле запроса игнорируется.
 
-**Body (zod):**
+**Body (inline-валидация по стилю кодбазы):**
 
 | Поле | Тип | Правило |
 |---|---|---|
@@ -179,13 +179,12 @@ export function isQuarterEnd(monthIso: string): boolean {
 **Юнит (vitest):**
 
 - `src/lib/quarter.ts` — граничные значения, валидность формата.
-- API `POST /api/monthly-financials`:
+- Логика upsert и валидации вынесена в тестируемую функцию в `src/lib/monthlyFinancials.ts`:
   - happy path (insert)
-  - upsert (второй POST обновляет ту же строку)
-  - 401 без сессии
-  - `memberId` из body игнорируется — запись уходит за юзера из сессии
+  - upsert (второй вызов обновляет ту же строку, `created_at` не меняется)
   - 400 в квартальный месяц без капитала
   - `capital != null` в неквартальный месяц — в БД запишется `null`
+  - минимальные поля (`reportText` пустой → ошибка, score вне 1..10 → ошибка)
 - API `GET /api/monthly-financials/me`:
   - возвращает запись юзера из сессии
   - возвращает `null` если нет
@@ -200,7 +199,7 @@ export function isQuarterEnd(monthIso: string): boolean {
 
 1. `src/lib/quarter.ts` + юнит-тесты.
 2. Миграция БД: `updated_at` + `UNIQUE(member_id, month)`; pre-check дубликатов.
-3. `POST /api/monthly-financials`: auth из сессии, zod, upsert, валидация квартала. Тесты.
+3. `POST /api/monthly-financials`: auth из сессии, inline-валидация, upsert, валидация квартала. Тесты.
 4. `GET /api/monthly-financials/me?month=...`. Тесты.
 5. `FinancialsClient.tsx`: edit-flow, квартал-скрытие, refetch при смене месяца, обработка 400.
 6. `/help`: блок «Ежемесячный отчёт».
