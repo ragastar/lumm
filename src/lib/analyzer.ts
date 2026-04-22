@@ -91,11 +91,24 @@ async function callOnce(args: AnalyzeArgs, apiKey: string): Promise<Analysis> {
 
   let parsed: unknown;
   try {
-    parsed = JSON.parse(content);
+    parsed = JSON.parse(extractJsonFromContent(content));
   } catch {
+    console.warn("[analyzer] не удалось распарсить:", content.slice(0, 300));
     throw new Error("LLM: не JSON");
   }
   return parseAnalysis(parsed);
+}
+
+function extractJsonFromContent(content: string): string {
+  const trimmed = content.trim();
+  const fence = trimmed.match(/^```(?:json)?\s*\n?([\s\S]*?)\n?```$/);
+  if (fence) return fence[1].trim();
+  const firstBrace = trimmed.indexOf("{");
+  const lastBrace = trimmed.lastIndexOf("}");
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    return trimmed.slice(firstBrace, lastBrace + 1);
+  }
+  return trimmed;
 }
 
 export async function analyze(args: AnalyzeArgs): Promise<Analysis> {

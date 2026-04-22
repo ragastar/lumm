@@ -14,6 +14,16 @@ const bot = new Bot(token);
 bot.command("start", (ctx) => ctx.reply("LUMM Bot запущен. Пиши еженедельные отчёты в группе."));
 
 bot.on("message:text", async (ctx) => {
+  console.log(
+    "[bot] incoming text from",
+    ctx.from?.id,
+    "(@" + (ctx.from?.username ?? "no-username") + ")",
+    "chat",
+    ctx.chat?.id,
+    "(" + ctx.chat?.type + ")",
+    "text:",
+    JSON.stringify(ctx.message.text.slice(0, 200)),
+  );
   if (!ctx.from?.id) return;
   try {
     await handleReport({
