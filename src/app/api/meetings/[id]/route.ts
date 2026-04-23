@@ -30,6 +30,8 @@ export async function GET(
       organizerId: meetings.organizerId,
       location: meetings.location,
       price: meetings.price,
+      title: meetings.title,
+      description: meetings.description,
       status: meetings.status,
       kind: meetings.kind,
       createdAt: meetings.createdAt,
@@ -68,6 +70,8 @@ export async function GET(
     timeEnd: m.timeEnd,
     location: m.location,
     price: m.price,
+    title: m.title,
+    description: m.description,
     status: m.status,
     kind: m.kind,
     createdAt: m.createdAt,
@@ -175,6 +179,28 @@ export async function PATCH(
       update.price = body.price;
     } else {
       return Response.json({ error: "Цена должна быть неотрицательным числом или null" }, { status: 400 });
+    }
+  }
+
+  if (body.title !== undefined) {
+    if (body.title === null || body.title === "") {
+      update.title = null;
+    } else if (typeof body.title === "string") {
+      const trimmed = body.title.trim();
+      update.title = trimmed === "" ? null : trimmed;
+    } else {
+      return Response.json({ error: "title должен быть строкой или null" }, { status: 400 });
+    }
+  }
+
+  if (body.description !== undefined) {
+    if (body.description === null || body.description === "") {
+      update.description = null;
+    } else if (typeof body.description === "string") {
+      const trimmed = body.description.trim();
+      update.description = trimmed === "" ? null : trimmed;
+    } else {
+      return Response.json({ error: "description должен быть строкой или null" }, { status: 400 });
     }
   }
 

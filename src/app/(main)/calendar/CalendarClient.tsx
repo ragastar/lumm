@@ -12,6 +12,8 @@ type Meeting = {
   organizerId: string | null;
   location: string | null;
   price: number | null;
+  title: string | null;
+  description: string | null;
   status: "scheduled" | "completed" | "cancelled";
   kind: "standard" | "ad_hoc";
   organizerDisplayName: string | null;
@@ -83,6 +85,8 @@ type FormState = {
   organizerId: string;
   location: string;
   price: string;
+  title: string;
+  description: string;
   status: "scheduled" | "completed" | "cancelled";
 };
 
@@ -94,6 +98,8 @@ const EMPTY_FORM: Omit<FormState, "date"> = {
   organizerId: "",
   location: "",
   price: "",
+  title: "",
+  description: "",
   status: "scheduled",
 };
 
@@ -121,6 +127,8 @@ export function CalendarClient({ meetings, pool, activeMembersCount }: Props) {
       organizerId: m.organizerId ?? "",
       location: m.location ?? "",
       price: m.price != null ? String(m.price) : "",
+      title: m.title ?? "",
+      description: m.description ?? "",
       status: m.status,
     });
     setError(null);
@@ -145,6 +153,8 @@ export function CalendarClient({ meetings, pool, activeMembersCount }: Props) {
       organizerId: form.organizerId || null,
       location: form.location.trim(),
       price: form.price === "" ? null : Number(form.price),
+      title: form.title.trim() || null,
+      description: form.description.trim() || null,
     };
     if (form.id) payload.status = form.status;
 
@@ -223,6 +233,9 @@ export function CalendarClient({ meetings, pool, activeMembersCount }: Props) {
                     <p className="text-xs text-lumm-text-secondary uppercase tracking-wide mb-1">
                       {m.kind === "standard" ? "Мастермайнд" : "Доп. встреча"}
                     </p>
+                    {m.title && (
+                      <p className="text-xl font-semibold text-lumm-text-primary mb-1">{m.title}</p>
+                    )}
                     <p className="text-lg text-lumm-text-primary">
                       {formatDate(m.date)} · {m.timeStart}–{m.timeEnd}
                     </p>
@@ -294,6 +307,9 @@ export function CalendarClient({ meetings, pool, activeMembersCount }: Props) {
                     <span className="text-xs text-lumm-text-secondary mr-2">
                       {m.kind === "standard" ? "мм." : "доп."}
                     </span>
+                    {m.title && (
+                      <span className="text-sm font-medium text-lumm-text-primary mr-2">{m.title}</span>
+                    )}
                     <span className="text-sm text-lumm-text-primary">
                       {formatDate(m.date)} · {m.timeStart}–{m.timeEnd}
                     </span>
@@ -335,6 +351,33 @@ export function CalendarClient({ meetings, pool, activeMembersCount }: Props) {
             <h3 className="text-lg font-medium text-lumm-gold">
               {form.id ? "Редактировать встречу" : "Новая встреча"}
             </h3>
+
+            <div>
+              <label className="block text-sm text-lumm-text-secondary mb-1">
+                Название (опционально)
+              </label>
+              <input
+                type="text"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                placeholder="напр. Разбор Q1"
+                maxLength={120}
+                className="w-full bg-lumm-gray border border-lumm-gray-light rounded-lg px-3 py-2 text-lumm-text-primary"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm text-lumm-text-secondary mb-1">
+                Контекст / повестка (опционально)
+              </label>
+              <textarea
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                rows={3}
+                placeholder="Что обсуждаем, зачем зовём — чтобы все понимали про что встреча"
+                className="w-full bg-lumm-gray border border-lumm-gray-light rounded-lg px-3 py-2 text-lumm-text-primary"
+              />
+            </div>
 
             <div>
               <label className="block text-sm text-lumm-text-secondary mb-1">Дата</label>

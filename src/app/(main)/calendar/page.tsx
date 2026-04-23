@@ -21,6 +21,8 @@ export default async function CalendarPage() {
       organizerId: meetings.organizerId,
       location: meetings.location,
       price: meetings.price,
+      title: meetings.title,
+      description: meetings.description,
       status: meetings.status,
       kind: meetings.kind,
       organizerDisplayName: members.displayName,

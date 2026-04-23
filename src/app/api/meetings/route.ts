@@ -26,6 +26,8 @@ export async function GET() {
       organizerId: meetings.organizerId,
       location: meetings.location,
       price: meetings.price,
+      title: meetings.title,
+      description: meetings.description,
       status: meetings.status,
       kind: meetings.kind,
       createdAt: meetings.createdAt,
@@ -88,6 +90,24 @@ export async function POST(request: Request) {
     price = body.price;
   }
 
+  let title: string | null = null;
+  if (body.title !== null && body.title !== undefined && body.title !== "") {
+    if (typeof body.title !== "string") {
+      return Response.json({ error: "title должен быть строкой или null" }, { status: 400 });
+    }
+    const trimmed = body.title.trim();
+    if (trimmed !== "") title = trimmed;
+  }
+
+  let description: string | null = null;
+  if (body.description !== null && body.description !== undefined && body.description !== "") {
+    if (typeof body.description !== "string") {
+      return Response.json({ error: "description должен быть строкой или null" }, { status: 400 });
+    }
+    const trimmed = body.description.trim();
+    if (trimmed !== "") description = trimmed;
+  }
+
   const kind = body.kind ?? "standard";
   if (typeof kind !== "string" || !ALLOWED_KIND.has(kind)) {
     return Response.json({ error: "kind должен быть standard или ad_hoc" }, { status: 400 });
@@ -125,6 +145,8 @@ export async function POST(request: Request) {
     organizerId,
     location,
     price,
+    title,
+    description,
     status: "scheduled",
     kind: kind as "standard" | "ad_hoc",
     createdAt: now,
@@ -162,6 +184,8 @@ export async function POST(request: Request) {
       organizerId,
       location,
       price,
+      title,
+      description,
       status: "scheduled",
       kind,
       createdAt: now,

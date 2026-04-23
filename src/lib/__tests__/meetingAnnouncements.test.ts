@@ -9,6 +9,7 @@ type TestMeeting = {
   kind: "standard" | "ad_hoc";
   location: string | null;
   price: number | null;
+  title: string | null;
 };
 
 type TestOrganizer = { displayName: string; telegramUsername: string | null } | null;
@@ -22,6 +23,7 @@ const meetingBase: TestMeeting = {
   kind: "standard",
   location: "кафе Место",
   price: null,
+  title: null,
 };
 
 const orgWithHandle: TestOrganizer = { displayName: "Theragastar", telegramUsername: "Theragastar" };
@@ -91,6 +93,18 @@ describe("composeAnnouncement — standard created", () => {
       baseUrl,
     });
     expect(msg).toContain("Ведёт: ещё не назначен");
+  });
+
+  it("с title — первой строкой идёт 📌 {title}", () => {
+    const msg = composeAnnouncement("created", {
+      meeting: { ...meetingBase, kind: "standard", title: "Подведём итоги Q1" },
+      organizer: orgWithHandle,
+      members: [],
+      baseUrl,
+    });
+    const firstLine = msg.split("\n")[0];
+    expect(firstLine).toBe("📌 Подведём итоги Q1");
+    expect(msg).toContain("Следующий мастермайнд");
   });
 });
 

@@ -28,6 +28,8 @@ export default async function MeetingDetailPage({
       organizerId: meetings.organizerId,
       location: meetings.location,
       price: meetings.price,
+      title: meetings.title,
+      description: meetings.description,
       status: meetings.status,
       kind: meetings.kind,
       organizerDisplayName: members.displayName,
@@ -80,6 +82,8 @@ export default async function MeetingDetailPage({
         organizerId: m.organizerId,
         location: m.location,
         price: m.price,
+        title: m.title,
+        description: m.description,
         status: m.status,
         kind: m.kind,
       }}
