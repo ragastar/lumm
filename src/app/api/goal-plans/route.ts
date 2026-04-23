@@ -17,7 +17,6 @@ export async function POST(request: Request) {
     return Response.json({ error: result.error }, { status: 400 });
   }
 
-  // Проверка на locked (на будущее — в MVP всегда 0)
   const existing = await db
     .select({ id: goalPlans.id, locked: goalPlans.locked })
     .from(goalPlans)
@@ -37,25 +36,11 @@ export async function POST(request: Request) {
   const kleinAvg = computeKleinAvg(v);
 
   const id = existing.length > 0 ? existing[0].id : randomUUID();
+  const createdAt = existing.length > 0 ? undefined : now;
 
-  if (existing.length > 0) {
-    await db
-      .update(goalPlans)
-      .set({
-        wish: v.wish,
-        sphere: v.sphere,
-        sciScore,
-        kleinAvg,
-        difficulty: v.difficulty,
-        metricName: v.metricName,
-        metricStart: v.metricStart,
-        metricTarget: v.metricTarget,
-        data: JSON.stringify(v.data),
-        updatedAt: now,
-      })
-      .where(eq(goalPlans.memberId, user.id));
-  } else {
-    await db.insert(goalPlans).values({
+  await db
+    .insert(goalPlans)
+    .values({
       id,
       memberId: user.id,
       wish: v.wish,
@@ -68,10 +53,24 @@ export async function POST(request: Request) {
       metricTarget: v.metricTarget,
       data: JSON.stringify(v.data),
       locked: 0,
-      createdAt: now,
+      createdAt: createdAt ?? now,
       updatedAt: now,
+    })
+    .onConflictDoUpdate({
+      target: goalPlans.memberId,
+      set: {
+        wish: v.wish,
+        sphere: v.sphere,
+        sciScore,
+        kleinAvg,
+        difficulty: v.difficulty,
+        metricName: v.metricName,
+        metricStart: v.metricStart,
+        metricTarget: v.metricTarget,
+        data: JSON.stringify(v.data),
+        updatedAt: now,
+      },
     });
-  }
 
   return Response.json({ id });
 }
