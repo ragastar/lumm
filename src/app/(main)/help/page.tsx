@@ -222,6 +222,26 @@ export default async function HelpPage() {
           <a href="/profile" className="text-lumm-gold hover:underline">/profile</a> под целями.
         </p>
       </section>
+
+      {/* LUMM Goal System */}
+      <section className="bg-lumm-black border border-lumm-gray-light/50 rounded-xl p-6 space-y-3">
+        <h2 className="text-xl font-semibold text-lumm-text-primary">8. LUMM Goal System (Wombo Combo)</h2>
+        <p className="text-sm text-lumm-text-secondary leading-relaxed">
+          Серьёзный путь постановки цели на 12 недель: WOOP + HARD + 12 Week Year + две психометрические шкалы качества (SCI Sheldon-Elliot и Klein). Живёт <strong>рядом</strong> с простыми «Моими целями» в профиле, не заменяет их.
+        </p>
+        <p className="text-sm text-lumm-text-secondary leading-relaxed">
+          Как начать: в сайдбаре пункт «🎯 Цель на 12 недель» или в профиле — блок с переливающейся кнопкой. Сначала читаешь лендинг{" "}
+          <a href="/goal" className="text-lumm-gold hover:underline">/goal</a>, потом проходишь мастер из 9 экранов (45–90 минут, можно прервать — черновик сохраняется автоматически). После сохранения цель видна тебе на{" "}
+          <a href="/goal/my" className="text-lumm-gold hover:underline">/goal/my</a> и другим участникам на{" "}
+          <code className="text-lumm-gold">/members/[id]</code> и <code className="text-lumm-gold">/goal/[id]</code>.
+        </p>
+        <p className="text-sm text-lumm-text-secondary leading-relaxed">
+          Редактировать формулировку можно в любой момент через «Уточнить формулировку». Отказаться от цели и начать заново — «Отказаться от цели» на /goal/my.
+        </p>
+        <p className="text-sm text-lumm-text-secondary leading-relaxed">
+          В MVP бот пока не знает про структурную цель — еженедельный анализ продолжает работать по старым полям «Бизнес-цель» и «Спортивная цель».
+        </p>
+      </section>
     </div>
   );
 }

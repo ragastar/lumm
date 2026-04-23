@@ -127,3 +127,20 @@ export const feedbackItems = sqliteTable("feedback_items", {
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });
+
+export const goalPlans = sqliteTable("goal_plans", {
+  id: text("id").primaryKey(),
+  memberId: text("member_id").notNull().unique().references(() => members.id, { onDelete: "cascade" }),
+  wish: text("wish").notNull(),
+  sphere: text("sphere").notNull(),
+  sciScore: integer("sci_score").notNull(),
+  kleinAvg: real("klein_avg").notNull(),
+  difficulty: integer("difficulty").notNull(),
+  metricName: text("metric_name"),
+  metricStart: text("metric_start"),
+  metricTarget: text("metric_target"),
+  data: text("data").notNull(),
+  locked: integer("locked").notNull().default(0),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
