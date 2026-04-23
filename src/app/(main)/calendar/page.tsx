@@ -1,9 +1,9 @@
 // src/app/(main)/calendar/page.tsx
 import { redirect } from "next/navigation";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/session";
 import { db } from "@/db";
-import { meetings, members } from "@/db/schema";
+import { meetings, members, meetingAttendees } from "@/db/schema";
 import { CalendarClient } from "./CalendarClient";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +24,10 @@ export default async function CalendarPage() {
       status: meetings.status,
       kind: meetings.kind,
       organizerDisplayName: members.displayName,
+      attendeesCount: sql<number>`(
+        SELECT COUNT(*) FROM ${meetingAttendees}
+        WHERE ${meetingAttendees.meetingId} = ${meetings.id}
+      )`.as("attendeesCount"),
     })
     .from(meetings)
     .leftJoin(members, eq(meetings.organizerId, members.id))

@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { groups, members, weeklyReports, monthlyFinancials } from "@/db/schema";
 import { ensureNextMeeting, findMeetingInNDays } from "@/lib/meetings";
 import { sendGroupMessage } from "@/lib/telegram";
+import { announceMeeting } from "@/lib/meetingAnnouncements";
 import {
   findLaggardsWeekly,
   findLaggardsMonthly,
@@ -48,25 +49,11 @@ async function dailyTick(): Promise<void> {
     try {
       const result = await ensureNextMeeting(g.id);
       if (result.created) {
-        const pool = await getActiveMembers(g.id);
-        const organizer = pool.find((m) => m.id === result.organizerId);
-        const organizerPart = organizer
-          ? organizer.telegramUsername
-            ? `@${organizer.telegramUsername}`
-            : organizer.displayName
-          : "ещё не назначен";
-        const [y, m, d] = result.date.split("-");
-        const lines = [
-          `Следующий мастермайнд: ${d}.${m}.${y} (четверг), ${result.timeStart}–${result.timeEnd}`,
-          `Ведёт: ${organizerPart}`,
-          `Адрес: ${result.location ?? "не указан"}`,
-        ];
-        if (result.price !== null && result.price > 0 && pool.length > 0) {
-          const perPerson = Math.round(result.price / pool.length);
-          lines.push(`Цена: ${result.price} ₽ (${perPerson} ₽/чел)`);
+        try {
+          await announceMeeting(result.meetingId, "created");
+        } catch (err) {
+          console.error(`[scheduler] announceMeeting for ${result.meetingId} failed:`, err);
         }
-        lines.push(`Детали и правки: https://lumm.space/calendar`);
-        await sendToGroup(lines.join("\n"));
       }
     } catch (err) {
       console.error(`[scheduler] ensureNextMeeting for group ${g.id} failed:`, err);

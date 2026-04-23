@@ -1,13 +1,88 @@
 // src/app/api/meetings/[id]/route.ts
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { meetings, members } from "@/db/schema";
+import { meetings, members, meetingAttendees } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
+import { announceMeeting } from "@/lib/meetingAnnouncements";
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 const ALLOWED_KIND = new Set(["standard", "ad_hoc"]);
 const ALLOWED_STATUS = new Set(["scheduled", "completed", "cancelled"]);
+
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return Response.json({ error: "Нет сессии" }, { status: 401 });
+  }
+  const { id } = await params;
+
+  const rows = await db
+    .select({
+      id: meetings.id,
+      groupId: meetings.groupId,
+      date: meetings.date,
+      timeStart: meetings.timeStart,
+      timeEnd: meetings.timeEnd,
+      organizerId: meetings.organizerId,
+      location: meetings.location,
+      price: meetings.price,
+      status: meetings.status,
+      kind: meetings.kind,
+      createdAt: meetings.createdAt,
+      organizerDisplayName: members.displayName,
+      organizerAvatarColor: members.avatarColor,
+      organizerAvatarUrl: members.avatarUrl,
+      organizerTelegramUsername: members.telegramUsername,
+    })
+    .from(meetings)
+    .leftJoin(members, eq(meetings.organizerId, members.id))
+    .where(eq(meetings.id, id))
+    .limit(1);
+
+  if (rows.length === 0 || rows[0].groupId !== user.groupId) {
+    return Response.json({ error: "Встреча не найдена" }, { status: 404 });
+  }
+  const m = rows[0];
+
+  const attendees = await db
+    .select({
+      memberId: members.id,
+      displayName: members.displayName,
+      avatarColor: members.avatarColor,
+      avatarUrl: members.avatarUrl,
+      telegramUsername: members.telegramUsername,
+    })
+    .from(meetingAttendees)
+    .innerJoin(members, eq(members.id, meetingAttendees.memberId))
+    .where(eq(meetingAttendees.meetingId, id))
+    .orderBy(meetingAttendees.createdAt);
+
+  return Response.json({
+    id: m.id,
+    date: m.date,
+    timeStart: m.timeStart,
+    timeEnd: m.timeEnd,
+    location: m.location,
+    price: m.price,
+    status: m.status,
+    kind: m.kind,
+    createdAt: m.createdAt,
+    organizer: m.organizerId
+      ? {
+          id: m.organizerId,
+          displayName: m.organizerDisplayName,
+          avatarColor: m.organizerAvatarColor,
+          avatarUrl: m.organizerAvatarUrl,
+          telegramUsername: m.organizerTelegramUsername,
+        }
+      : null,
+    attendees,
+  });
+}
 
 export async function PATCH(
   request: Request,
@@ -129,7 +204,22 @@ export async function PATCH(
     return Response.json({ error: "Нет полей для обновления" }, { status: 400 });
   }
 
+  // Определяем был ли переход в cancelled до коммита обновления
+  const wasScheduled = (await db
+    .select({ status: meetings.status })
+    .from(meetings)
+    .where(eq(meetings.id, id))
+    .limit(1))[0]?.status === "scheduled";
+
   await db.update(meetings).set(update).where(eq(meetings.id, id));
+
+  if (wasScheduled && update.status === "cancelled") {
+    try {
+      await announceMeeting(id, "cancelled");
+    } catch (err) {
+      console.error("[PATCH meeting] announceMeeting cancelled failed:", err);
+    }
+  }
 
   const [saved] = await db
     .select()

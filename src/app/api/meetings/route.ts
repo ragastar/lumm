@@ -1,9 +1,10 @@
 // src/app/api/meetings/route.ts
 import { randomUUID } from "crypto";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { meetings, members } from "@/db/schema";
+import { meetings, members, meetingAttendees } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
+import { announceMeeting } from "@/lib/meetingAnnouncements";
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -29,6 +30,10 @@ export async function GET() {
       kind: meetings.kind,
       createdAt: meetings.createdAt,
       organizerDisplayName: members.displayName,
+      attendeesCount: sql<number>`(
+        SELECT COUNT(*) FROM ${meetingAttendees}
+        WHERE ${meetingAttendees.meetingId} = ${meetings.id}
+      )`.as("attendeesCount"),
     })
     .from(meetings)
     .leftJoin(members, eq(meetings.organizerId, members.id))
@@ -124,6 +129,28 @@ export async function POST(request: Request) {
     kind: kind as "standard" | "ad_hoc",
     createdAt: now,
   });
+
+  // Для ad_hoc — организатор автоматически записан
+  if (kind === "ad_hoc" && organizerId) {
+    try {
+      await db.insert(meetingAttendees).values({
+        id: randomUUID(),
+        meetingId: id,
+        memberId: organizerId,
+        createdAt: now,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (!/UNIQUE/i.test(message)) throw err;
+    }
+  }
+
+  // Анонс в групповой чат
+  try {
+    await announceMeeting(id, "created");
+  } catch (err) {
+    console.error("[POST meetings] announceMeeting failed:", err);
+  }
 
   return Response.json(
     {

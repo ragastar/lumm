@@ -15,6 +15,7 @@ type Meeting = {
   status: "scheduled" | "completed" | "cancelled";
   kind: "standard" | "ad_hoc";
   organizerDisplayName: string | null;
+  attendeesCount: number;
 };
 
 type PoolMember = { id: string; displayName: string };
@@ -214,12 +215,13 @@ export function CalendarClient({ meetings, pool, activeMembersCount }: Props) {
             return (
               <div
                 key={m.id}
-                className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6"
+                onClick={() => router.push(`/calendar/${m.id}`)}
+                className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6 cursor-pointer hover:border-lumm-gold/40 transition-colors"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-xs text-lumm-text-secondary uppercase tracking-wide mb-1">
-                      {m.kind === "standard" ? "Стандартная" : "Ad-hoc"}
+                      {m.kind === "standard" ? "Мастермайнд" : "Доп. встреча"}
                     </p>
                     <p className="text-lg text-lumm-text-primary">
                       {formatDate(m.date)} · {m.timeStart}–{m.timeEnd}
@@ -242,16 +244,27 @@ export function CalendarClient({ meetings, pool, activeMembersCount }: Props) {
                         )}
                       </p>
                     )}
+                    {m.kind === "ad_hoc" && (
+                      <p className="text-sm text-lumm-gold mt-1">
+                        Идут: {m.attendeesCount}
+                      </p>
+                    )}
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <button
-                      onClick={() => openEdit(m)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEdit(m);
+                      }}
                       className="px-3 py-1 text-sm text-lumm-text-secondary border border-lumm-gray-light rounded hover:text-lumm-text-primary"
                     >
                       Редактировать
                     </button>
                     <button
-                      onClick={() => cancelMeeting(m)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        cancelMeeting(m);
+                      }}
                       className="px-3 py-1 text-sm text-red-400 border border-red-500/30 rounded hover:bg-red-500/10"
                     >
                       Отменить
@@ -271,14 +284,15 @@ export function CalendarClient({ meetings, pool, activeMembersCount }: Props) {
             {past.map((m) => (
               <div
                 key={m.id}
-                className={`bg-lumm-black border border-lumm-gray-light/50 rounded-lg p-4 ${
+                onClick={() => router.push(`/calendar/${m.id}`)}
+                className={`bg-lumm-black border border-lumm-gray-light/50 rounded-lg p-4 cursor-pointer hover:border-lumm-gray-light ${
                   m.status === "cancelled" ? "opacity-50" : ""
                 }`}
               >
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <span className="text-xs text-lumm-text-secondary mr-2">
-                      {m.kind === "standard" ? "ст." : "ad-hoc"}
+                      {m.kind === "standard" ? "мм." : "доп."}
                     </span>
                     <span className="text-sm text-lumm-text-primary">
                       {formatDate(m.date)} · {m.timeStart}–{m.timeEnd}
@@ -293,7 +307,10 @@ export function CalendarClient({ meetings, pool, activeMembersCount }: Props) {
                     </span>
                   </div>
                   <button
-                    onClick={() => openEdit(m)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEdit(m);
+                    }}
                     className="text-xs text-lumm-text-secondary hover:text-lumm-text-primary"
                   >
                     Редактировать
@@ -363,7 +380,7 @@ export function CalendarClient({ meetings, pool, activeMembersCount }: Props) {
                     checked={form.kind === "standard"}
                     onChange={() => setForm({ ...form, kind: "standard" })}
                   />
-                  Стандартная (в ротации)
+                  Мастермайнд (в ротации)
                 </label>
                 <label className="flex items-center gap-2">
                   <input
@@ -372,7 +389,7 @@ export function CalendarClient({ meetings, pool, activeMembersCount }: Props) {
                     checked={form.kind === "ad_hoc"}
                     onChange={() => setForm({ ...form, kind: "ad_hoc" })}
                   />
-                  Ad-hoc (вне ротации)
+                  Доп. встреча (вне ротации)
                 </label>
               </div>
             </div>
