@@ -12,7 +12,7 @@ export default async function HelpPage() {
       <div>
         <h1 className="text-3xl font-bold text-lumm-text-primary">Как это работает</h1>
         <p className="text-sm text-lumm-text-secondary mt-1">
-          Коротко про отчёты, светофор и цели.
+          Коротко про отчёты, светофор, цели, встречи и бот-напоминания.
         </p>
       </div>
 
@@ -144,6 +144,58 @@ export default async function HelpPage() {
           <strong>Редактировать</strong> можно в любой момент: сохраняешь заново, запись обновляется.
           Финалом считается последняя сохранённая версия.
         </p>
+      </section>
+
+      {/* Календарь встреч + бот-напоминания */}
+      <section className="bg-lumm-black border border-lumm-gray-light/50 rounded-xl p-6 space-y-4">
+        <h2 className="text-xl font-semibold text-lumm-text-primary">6. Календарь встреч</h2>
+        <p className="text-sm text-lumm-text-secondary">
+          Все встречи группы живут на <a href="/calendar" className="text-lumm-gold hover:underline">/calendar</a>.
+          Любой участник может создать встречу, перенести, отменить или сменить организатора.
+        </p>
+
+        <div className="text-sm text-lumm-text-secondary space-y-1">
+          <p><strong>Два типа встреч:</strong></p>
+          <ul className="list-disc list-inside space-y-1 pl-2">
+            <li>
+              <strong>Стандартная</strong> — регулярный мастермайнд. По умолчанию — 3-й четверг месяца.
+              Организатор назначается <strong>по очереди</strong> (ротация по порядку регистрации участников).
+            </li>
+            <li>
+              <strong>Ad-hoc</strong> — внеплановая встреча (обсудить чью-то проблему, фокус-сессия и т.п.). В ротации
+              организаторов не участвует.
+            </li>
+          </ul>
+        </div>
+
+        <div className="text-sm text-lumm-text-secondary space-y-1">
+          <p><strong>Поля встречи:</strong></p>
+          <ul className="list-disc list-inside space-y-1 pl-2">
+            <li>Дата и время (начало/окончание)</li>
+            <li>Адрес — обязательно</li>
+            <li>Цена — опционально; если указана, автоматически делится на число активных участников и показывается «X ₽ / чел»</li>
+            <li>Организатор — из активных участников группы</li>
+          </ul>
+        </div>
+
+        <p className="text-sm text-lumm-text-secondary">
+          <strong>Автосоздание:</strong> каждый день в 09:00 MSK бот проверяет, есть ли в календаре будущая
+          стандартная встреча. Если нет — создаёт на следующий 3-й четверг, назначает организатора по ротации и
+          пишет в групповой чат: «Следующий мастермайнд: ДД.ММ.ГГГГ, ведёт @username». Адрес/цену организатор дозаполняет в <a href="/calendar" className="text-lumm-gold hover:underline">/calendar</a>.
+        </p>
+
+        <p className="text-sm text-lumm-text-secondary">
+          <strong>Смена организатора:</strong> если кто-то не может вести свою встречу — в /calendar нажимаешь «Редактировать»
+          и выбираешь другого из списка. Следующая стандартная встреча уходит дальше по кругу от нового организатора.
+        </p>
+
+        <div className="text-sm text-lumm-text-secondary space-y-1">
+          <p><strong>Бот напоминает (молчит, если все сдали):</strong></p>
+          <ul className="list-disc list-inside space-y-1 pl-2">
+            <li><strong>Воскресенье 19:00 MSK</strong> — пинг тем, кто не сдал еженедельный отчёт за эту неделю.</li>
+            <li><strong>За 3 дня до ближайшей стандартной встречи</strong> — пинг тем, кто не сдал ежемесячный.</li>
+          </ul>
+        </div>
       </section>
     </div>
   );
