@@ -115,6 +115,7 @@ describe("composeAnnouncement — ad_hoc created", () => {
     expect(msg).toContain("21.05.2026");
     expect(msg).toContain("19:00–21:00");
     expect(msg).toContain(`${baseUrl}/calendar/m-1`);
+    expect(msg).not.toContain("Цена");
   });
 
   it("с ценой — total и per-person делится на число members", () => {
