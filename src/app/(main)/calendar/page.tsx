@@ -21,7 +21,6 @@ export default async function CalendarPage() {
       status: meetings.status,
       kind: meetings.kind,
       organizerDisplayName: members.displayName,
-      organizerAvatarColor: members.avatarColor,
     })
     .from(meetings)
     .leftJoin(members, eq(meetings.organizerId, members.id))

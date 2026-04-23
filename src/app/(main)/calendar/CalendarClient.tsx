@@ -12,7 +12,6 @@ type Meeting = {
   status: "scheduled" | "completed" | "cancelled";
   kind: "standard" | "ad_hoc";
   organizerDisplayName: string | null;
-  organizerAvatarColor: string | null;
 };
 
 type PoolMember = { id: string; displayName: string };
@@ -55,9 +54,8 @@ type FormState = {
   status: "scheduled" | "completed" | "cancelled";
 };
 
-const EMPTY_FORM: FormState = {
+const EMPTY_FORM: Omit<FormState, "date"> = {
   id: null,
-  date: today(),
   kind: "ad_hoc",
   organizerId: "",
   location: "",
@@ -74,7 +72,7 @@ export function CalendarClient({ meetings, pool }: Props) {
   const past = meetings.filter((m) => m.status !== "scheduled");
 
   function openCreate() {
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM, date: today() });
     setError(null);
   }
 
