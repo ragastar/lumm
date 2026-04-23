@@ -82,6 +82,7 @@ sqlite.exec(`
     organizer_id TEXT REFERENCES members(id),
     location TEXT,
     status TEXT NOT NULL DEFAULT 'scheduled',
+    kind TEXT NOT NULL DEFAULT 'standard',
     created_at TEXT NOT NULL
   );
 `);
