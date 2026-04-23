@@ -37,6 +37,22 @@ function formatDate(dateStr: string): string {
   });
 }
 
+function pluralDays(n: number): string {
+  // n > 0 only — upstream guards.
+  const n10 = n % 10;
+  const n100 = n % 100;
+  if (n10 === 1 && n100 !== 11) return "день";
+  if (n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14)) return "дня";
+  return "дней";
+}
+
+function formatCountdown(days: number): string {
+  if (days === 0) return "Сегодня";
+  if (days === 1) return "Завтра";
+  if (days > 1) return `Через ${days} ${pluralDays(days)}`;
+  return `Было ${-days} ${pluralDays(-days)} назад`;
+}
+
 function today(): string {
   const d = new Date();
   const y = d.getFullYear();
@@ -182,11 +198,7 @@ export function CalendarClient({ meetings, pool }: Props) {
                       {m.kind === "standard" ? "Стандартная" : "Ad-hoc"}
                     </p>
                     <p className="text-lg text-lumm-text-primary">{formatDate(m.date)}</p>
-                    <p className="text-sm text-lumm-text-secondary mt-1">
-                      {days === 0 && "Сегодня"}
-                      {days === 1 && "Завтра"}
-                      {days > 1 && `Через ${days} ${days === 1 ? "день" : "дней"}`}
-                    </p>
+                    <p className="text-sm text-lumm-text-secondary mt-1">{formatCountdown(days)}</p>
                     <p className="text-sm text-lumm-text-secondary mt-2">
                       Организатор: {m.organizerDisplayName ?? "не назначен"}
                     </p>

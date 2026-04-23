@@ -62,12 +62,16 @@ export async function POST(request: Request) {
       return Response.json({ error: "organizerId должен быть строкой или null" }, { status: 400 });
     }
     const member = await db
-      .select({ id: members.id, groupId: members.groupId })
+      .select({ id: members.id, groupId: members.groupId, status: members.status })
       .from(members)
       .where(eq(members.id, body.organizerId))
       .limit(1);
-    if (member.length === 0 || member[0].groupId !== user.groupId) {
-      return Response.json({ error: "Организатор не найден в вашей группе" }, { status: 400 });
+    if (
+      member.length === 0 ||
+      member[0].groupId !== user.groupId ||
+      member[0].status !== "active"
+    ) {
+      return Response.json({ error: "Организатор должен быть активным участником вашей группы" }, { status: 400 });
     }
     organizerId = body.organizerId;
   }
