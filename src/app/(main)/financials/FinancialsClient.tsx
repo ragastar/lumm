@@ -368,7 +368,8 @@ export function FinancialsClient({ currentMember, feed }: Props) {
                 {feed.map((r) => (
                   <tr
                     key={r.id}
-                    className={`border-b border-lumm-gray-light/50 hover:bg-lumm-gray/20 ${
+                    onClick={() => router.push(`/financials/${r.id}`)}
+                    className={`border-b border-lumm-gray-light/50 hover:bg-lumm-gray/20 cursor-pointer ${
                       r.memberId === currentMember.id ? "bg-lumm-gold/5" : ""
                     }`}
                   >
