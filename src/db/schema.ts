@@ -101,3 +101,16 @@ export const reportAnalyses = sqliteTable("report_analyses", {
   model: text("model").notNull(),
   createdAt: text("created_at").notNull(),
 });
+
+export const meetingAttendees = sqliteTable(
+  "meeting_attendees",
+  {
+    id: text("id").primaryKey(),
+    meetingId: text("meeting_id").notNull().references(() => meetings.id),
+    memberId: text("member_id").notNull().references(() => members.id),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => ({
+    uniqMeetingMember: uniqueIndex("uniq_meeting_member").on(table.meetingId, table.memberId),
+  }),
+);
