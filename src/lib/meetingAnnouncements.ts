@@ -1,5 +1,10 @@
 // src/lib/meetingAnnouncements.ts
 
+import { and, eq } from "drizzle-orm";
+import { db } from "@/db";
+import { meetings, members as membersTable } from "@/db/schema";
+import { sendGroupMessage } from "./telegram";
+
 export type AnnounceEvent = "created" | "cancelled";
 
 export type AnnMeeting = {
@@ -81,4 +86,75 @@ export function composeAnnouncement(event: AnnounceEvent, input: AnnouncementInp
   }
   lines.push(`Записаться: ${url}`);
   return lines.join("\n");
+}
+
+// --- IO-адаптер ---
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://lumm.space";
+
+export async function announceMeeting(meetingId: string, event: AnnounceEvent): Promise<void> {
+  const chatId = process.env.GROUP_CHAT_ID;
+  if (!chatId) {
+    console.error("[announceMeeting] GROUP_CHAT_ID не задан — пропускаю отправку");
+    return;
+  }
+
+  const rows = await db
+    .select({
+      id: meetings.id,
+      groupId: meetings.groupId,
+      date: meetings.date,
+      timeStart: meetings.timeStart,
+      timeEnd: meetings.timeEnd,
+      kind: meetings.kind,
+      location: meetings.location,
+      price: meetings.price,
+      organizerDisplayName: membersTable.displayName,
+      organizerUsername: membersTable.telegramUsername,
+    })
+    .from(meetings)
+    .leftJoin(membersTable, eq(meetings.organizerId, membersTable.id))
+    .where(eq(meetings.id, meetingId))
+    .limit(1);
+
+  if (rows.length === 0) {
+    console.error(`[announceMeeting] meeting ${meetingId} not found`);
+    return;
+  }
+  const r = rows[0];
+
+  const organizer: AnnOrganizer = r.organizerDisplayName
+    ? { displayName: r.organizerDisplayName, telegramUsername: r.organizerUsername }
+    : null;
+
+  // members нужны только для ad_hoc created и для расчёта per-person.
+  let activeMembers: AnnMember[] = [];
+  if (event === "created") {
+    const poolRows = await db
+      .select({ displayName: membersTable.displayName, telegramUsername: membersTable.telegramUsername })
+      .from(membersTable)
+      .where(and(eq(membersTable.groupId, r.groupId), eq(membersTable.status, "active")));
+    activeMembers = poolRows;
+  }
+
+  const text = composeAnnouncement(event, {
+    meeting: {
+      id: r.id,
+      date: r.date,
+      timeStart: r.timeStart,
+      timeEnd: r.timeEnd,
+      kind: r.kind,
+      location: r.location,
+      price: r.price,
+    },
+    organizer,
+    members: activeMembers,
+    baseUrl: BASE_URL,
+  });
+
+  try {
+    await sendGroupMessage({ chatId, text });
+  } catch (err) {
+    console.error("[announceMeeting] sendGroupMessage failed:", err);
+  }
 }
