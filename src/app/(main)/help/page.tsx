@@ -12,7 +12,7 @@ export default async function HelpPage() {
       <div>
         <h1 className="text-3xl font-bold text-lumm-text-primary">Как это работает</h1>
         <p className="text-sm text-lumm-text-secondary mt-1">
-          Коротко про отчёты, светофор, цели, встречи и бот-напоминания.
+          Коротко про отчёты, светофор, цели, встречи, бот-напоминания и штурвал.
         </p>
       </div>
 
@@ -203,6 +203,24 @@ export default async function HelpPage() {
             <li><strong>За 3 дня до ближайшей стандартной встречи</strong> — пинг тем, кто не сдал ежемесячный.</li>
           </ul>
         </div>
+      </section>
+
+      {/* Штурвал */}
+      <section className="bg-lumm-black border border-lumm-gray-light/50 rounded-xl p-6 space-y-3">
+        <h2 className="text-xl font-semibold text-lumm-text-primary">7. Штурвал — обратная связь</h2>
+        <p className="text-sm text-lumm-text-secondary">
+          Идею / баг / правку пиши боту в группе:
+        </p>
+        <div className="bg-lumm-gray-dark border border-lumm-gray-light rounded-lg p-4">
+          <pre className="text-sm text-lumm-text-primary whitespace-pre-wrap font-sans">
+{`@lummbrain_bot штурвал хорошо бы добавить график капитала на дашборд`}
+          </pre>
+        </div>
+        <p className="text-sm text-lumm-text-secondary">
+          Бот сохранит и ответит. Дальше статус «Новый → В работе → Готово / Отклонено» видно на вкладке{" "}
+          <a href="/feedback" className="text-lumm-gold hover:underline">Штурвал</a>. Свои — в{" "}
+          <a href="/profile" className="text-lumm-gold hover:underline">/profile</a> под целями.
+        </p>
       </section>
     </div>
   );
