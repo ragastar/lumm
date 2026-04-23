@@ -1,5 +1,6 @@
 import { Bot } from "grammy";
 import { handleReport } from "./handleReport";
+import { startScheduler } from "./scheduler";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 if (!token) {
@@ -49,5 +50,8 @@ bot.catch((err) => {
 });
 
 bot.start({
-  onStart: () => console.log("LUMM Bot started (long-polling)"),
+  onStart: () => {
+    console.log("LUMM Bot started (long-polling)");
+    startScheduler();
+  },
 });
