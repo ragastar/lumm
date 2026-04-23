@@ -1,5 +1,6 @@
 import { Bot } from "grammy";
 import { handleReport } from "./handleReport";
+import { handleSteering } from "./handleSteering";
 import { startScheduler } from "./scheduler";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -26,21 +27,33 @@ bot.on("message:text", async (ctx) => {
     JSON.stringify(ctx.message.text.slice(0, 200)),
   );
   if (!ctx.from?.id) return;
+
+  const reply = async (msg: string) => {
+    await ctx.reply(msg, { reply_parameters: { message_id: ctx.message.message_id } });
+  };
+
   try {
-    await handleReport({
+    const handled = await handleReport({
       text: ctx.message.text,
       fromId: String(ctx.from.id),
-      reply: async (msg) => {
-        await ctx.reply(msg, { reply_parameters: { message_id: ctx.message.message_id } });
-      },
+      reply,
       baseUrl,
     });
+    if (handled) return;
+
+    await handleSteering({
+      text: ctx.message.text,
+      fromId: String(ctx.from.id),
+      reply,
+      baseUrl,
+      botUsername: process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? "lummbrain_bot",
+    });
   } catch (err) {
-    console.error("[bot] handleReport crashed:", err);
+    console.error("[bot] handler crashed:", err);
     try {
       await ctx.reply("Что-то пошло не так. Попробуй через минуту.");
     } catch {
-      /* swallow — уже упали */
+      /* swallow */
     }
   }
 });
