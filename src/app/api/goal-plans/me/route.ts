@@ -33,5 +33,5 @@ export async function DELETE() {
   }
 
   await db.delete(goalPlans).where(eq(goalPlans.memberId, user.id));
-  return new Response(null, { status: 204 });
+  return Response.json({ ok: true });
 }
