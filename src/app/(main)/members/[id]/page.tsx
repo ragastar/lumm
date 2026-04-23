@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { db } from "@/db";
-import { members } from "@/db/schema";
+import { goalPlans, members } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { Avatar } from "@/components/Avatar";
 
@@ -50,6 +50,24 @@ export default async function MemberDetailPage({
 
   const m = rows[0];
 
+  const goalRows = await db
+    .select({
+      id: goalPlans.id,
+      wish: goalPlans.wish,
+      sphere: goalPlans.sphere,
+      sciScore: goalPlans.sciScore,
+      kleinAvg: goalPlans.kleinAvg,
+      difficulty: goalPlans.difficulty,
+      metricName: goalPlans.metricName,
+      metricStart: goalPlans.metricStart,
+      metricTarget: goalPlans.metricTarget,
+    })
+    .from(goalPlans)
+    .where(eq(goalPlans.memberId, id))
+    .limit(1);
+
+  const goalSummary = goalRows.length > 0 ? goalRows[0] : null;
+
   return (
     <div className="max-w-md mx-auto space-y-6">
       <Link
@@ -74,7 +92,7 @@ export default async function MemberDetailPage({
       </div>
 
       <div className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-lumm-text-primary">Цели</h2>
+        <h2 className="text-lg font-semibold text-lumm-text-primary">Краткие цели</h2>
         <div>
           <p className="text-xs text-lumm-text-secondary uppercase tracking-wide mb-1">Бизнес</p>
           <p className="text-sm text-lumm-text-primary whitespace-pre-wrap">
@@ -88,6 +106,38 @@ export default async function MemberDetailPage({
           </p>
         </div>
       </div>
+
+      {goalSummary && (
+        <div className="bg-lumm-black border border-lumm-gold/30 rounded-xl p-6 space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-lumm-text-primary">Структурная цель на цикл</h2>
+            <span className="text-[10px] uppercase tracking-wider text-lumm-gold">LUMM Goal System</span>
+          </div>
+          <p className="text-sm text-lumm-text-primary leading-snug">{goalSummary.wish}</p>
+          {goalSummary.metricName && (
+            <p className="text-xs text-lumm-text-secondary">
+              {goalSummary.metricName}: {goalSummary.metricStart ?? "—"} → {goalSummary.metricTarget ?? "—"}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <span className="px-2 py-0.5 rounded-full text-[11px] bg-lumm-gray border border-lumm-gray-light text-lumm-text-primary">
+              Сложность {goalSummary.difficulty}/10
+            </span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] bg-lumm-gold/10 text-lumm-gold border border-lumm-gold/30">
+              SCI: {goalSummary.sciScore > 0 ? "+" : ""}{goalSummary.sciScore}
+            </span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] bg-lumm-gold/10 text-lumm-gold border border-lumm-gold/30">
+              Klein: {goalSummary.kleinAvg.toFixed(1)}/5
+            </span>
+          </div>
+          <Link
+            href={`/goal/${id}`}
+            className="inline-flex items-center gap-2 text-sm text-lumm-gold hover:underline"
+          >
+            Открыть полный план →
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
