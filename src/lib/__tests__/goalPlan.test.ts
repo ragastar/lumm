@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { computeSciScore, computeKleinAvg } from "../goalPlan";
+import { computeSciScore, computeKleinAvg, validateGoalPlanPayload } from "../goalPlan";
 
 describe("computeSciScore", () => {
   test("максимум: intrinsic+identified=9+9, shame+external=1+1 → +16", () => {
@@ -38,5 +38,80 @@ describe("computeKleinAvg", () => {
 
   test("округление до 1 знака: 3+3+3+4=13 → 3.3 (не 3.25)", () => {
     expect(computeKleinAvg({ klein1: 3, klein2: 3, klein3: 3, klein4: 4 })).toBe(3.3);
+  });
+});
+
+const validBody = {
+  wish: "Вывести бизнес на выручку 5 млн ₽/мес к 12-й неделе",
+  sphere: "business",
+  difficulty: 7,
+  metricName: "Выручка",
+  metricStart: "2.3 млн ₽",
+  metricTarget: "5 млн ₽",
+  sciShame: 3,
+  sciExternal: 4,
+  sciIdentified: 8,
+  sciIntrinsic: 7,
+  klein1: 4,
+  klein2: 5,
+  klein3: 4,
+  klein4: 5,
+  data: { foo: "bar" },
+};
+
+describe("validateGoalPlanPayload", () => {
+  test("валидный body проходит", () => {
+    const r = validateGoalPlanPayload(validBody);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value.wish).toBe(validBody.wish);
+  });
+
+  test("пустое тело → error", () => {
+    expect(validateGoalPlanPayload(null).ok).toBe(false);
+    expect(validateGoalPlanPayload("не объект").ok).toBe(false);
+  });
+
+  test("wish короче 20 символов → error", () => {
+    const r = validateGoalPlanPayload({ ...validBody, wish: "короткий" });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toMatch(/wish/i);
+  });
+
+  test("wish длиннее 200 символов → error", () => {
+    const longWish = "a".repeat(201);
+    const r = validateGoalPlanPayload({ ...validBody, wish: longWish });
+    expect(r.ok).toBe(false);
+  });
+
+  test("неизвестный sphere → error", () => {
+    const r = validateGoalPlanPayload({ ...validBody, sphere: "martial_arts" });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toMatch(/sphere/i);
+  });
+
+  test("difficulty вне 1..10 → error", () => {
+    expect(validateGoalPlanPayload({ ...validBody, difficulty: 0 }).ok).toBe(false);
+    expect(validateGoalPlanPayload({ ...validBody, difficulty: 11 }).ok).toBe(false);
+  });
+
+  test("SCI raw вне 1..9 → error", () => {
+    expect(validateGoalPlanPayload({ ...validBody, sciShame: 0 }).ok).toBe(false);
+    expect(validateGoalPlanPayload({ ...validBody, sciIntrinsic: 10 }).ok).toBe(false);
+  });
+
+  test("Klein raw вне 1..5 → error", () => {
+    expect(validateGoalPlanPayload({ ...validBody, klein1: 0 }).ok).toBe(false);
+    expect(validateGoalPlanPayload({ ...validBody, klein2: 6 }).ok).toBe(false);
+  });
+
+  test("metricName допускает null и пустую строку (необязательное поле)", () => {
+    expect(validateGoalPlanPayload({ ...validBody, metricName: null, metricStart: null, metricTarget: null }).ok).toBe(true);
+    expect(validateGoalPlanPayload({ ...validBody, metricName: "" }).ok).toBe(true);
+  });
+
+  test("data обязательно должен быть объектом (можно пустым)", () => {
+    expect(validateGoalPlanPayload({ ...validBody, data: {} }).ok).toBe(true);
+    expect(validateGoalPlanPayload({ ...validBody, data: "не объект" }).ok).toBe(false);
+    expect(validateGoalPlanPayload({ ...validBody, data: null }).ok).toBe(false);
   });
 });
