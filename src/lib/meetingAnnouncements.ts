@@ -15,6 +15,7 @@ export type AnnMeeting = {
   kind: "standard" | "ad_hoc";
   location: string | null;
   price: number | null;
+  title: string | null;
 };
 
 export type AnnOrganizer = { displayName: string; telegramUsername: string | null } | null;
@@ -48,21 +49,26 @@ export function composeAnnouncement(event: AnnounceEvent, input: AnnouncementInp
   const time = `${meeting.timeStart}–${meeting.timeEnd}`;
   const url = `${baseUrl}/calendar/${meeting.id}`;
 
+  const titleLine = meeting.title ? `📌 ${meeting.title}` : null;
+
   if (event === "cancelled") {
-    const lines = [`Встреча ${date} ${time} отменена.`];
-    if (organizer) {
-      lines[0] += ` Организатор: ${mention(organizer)}.`;
-    }
+    const lines: string[] = [];
+    if (titleLine) lines.push(titleLine);
+    let cancelLine = `Встреча ${date} ${time} отменена.`;
+    if (organizer) cancelLine += ` Организатор: ${mention(organizer)}.`;
+    lines.push(cancelLine);
     return lines.join("\n");
   }
 
   // event === "created"
   if (meeting.kind === "standard") {
-    const lines = [
+    const lines: string[] = [];
+    if (titleLine) lines.push(titleLine);
+    lines.push(
       `Следующий мастермайнд: ${date} ${time}`,
       `Ведёт: ${organizerLabel(organizer)}`,
       `Адрес: ${meeting.location ?? "не указан"}`,
-    ];
+    );
     if (meeting.price !== null && meeting.price > 0 && members.length > 0) {
       const perPerson = Math.round(meeting.price / members.length);
       lines.push(`Цена: ${meeting.price} ₽ (${perPerson} ₽/чел)`);
@@ -76,10 +82,9 @@ export function composeAnnouncement(event: AnnounceEvent, input: AnnouncementInp
   const intro = organizer
     ? `${allMentions} — ${mention(organizer)} зовёт на доп. встречу ${date} ${time}.`
     : `${allMentions} — доп. встречу ${date} ${time}.`;
-  const lines = [
-    intro,
-    `Адрес: ${meeting.location ?? "не указан"}`,
-  ];
+  const lines: string[] = [];
+  if (titleLine) lines.push(titleLine);
+  lines.push(intro, `Адрес: ${meeting.location ?? "не указан"}`);
   if (meeting.price !== null && meeting.price > 0 && members.length > 0) {
     const perPerson = Math.round(meeting.price / members.length);
     lines.push(`Цена: ${meeting.price} ₽ (${perPerson} ₽/чел)`);
@@ -109,6 +114,7 @@ export async function announceMeeting(meetingId: string, event: AnnounceEvent): 
       kind: meetings.kind,
       location: meetings.location,
       price: meetings.price,
+      title: meetings.title,
       organizerDisplayName: membersTable.displayName,
       organizerUsername: membersTable.telegramUsername,
     })
@@ -146,6 +152,7 @@ export async function announceMeeting(meetingId: string, event: AnnounceEvent): 
       kind: r.kind,
       location: r.location,
       price: r.price,
+      title: r.title,
     },
     organizer,
     members: activeMembers,

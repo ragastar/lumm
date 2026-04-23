@@ -85,6 +85,8 @@ sqlite.exec(`
     organizer_id TEXT REFERENCES members(id),
     location TEXT,
     price REAL,
+    title TEXT,
+    description TEXT,
     status TEXT NOT NULL DEFAULT 'scheduled',
     kind TEXT NOT NULL DEFAULT 'standard',
     created_at TEXT NOT NULL

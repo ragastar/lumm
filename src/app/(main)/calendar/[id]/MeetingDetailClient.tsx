@@ -14,6 +14,8 @@ type Meeting = {
   organizerId: string | null;
   location: string | null;
   price: number | null;
+  title: string | null;
+  description: string | null;
   status: "scheduled" | "completed" | "cancelled";
   kind: "standard" | "ad_hoc";
 };
@@ -173,6 +175,17 @@ export function MeetingDetailClient({
           {statusLabel(meeting.status)}
         </span>
       </div>
+
+      {meeting.title && (
+        <h1 className="text-3xl font-bold text-lumm-text-primary">{meeting.title}</h1>
+      )}
+
+      {meeting.description && (
+        <section className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6 space-y-2">
+          <h2 className="text-lg font-semibold text-lumm-text-primary">Контекст</h2>
+          <p className="text-lumm-text-primary whitespace-pre-wrap">{meeting.description}</p>
+        </section>
+      )}
 
       <section className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6 space-y-2">
         <h2 className="text-lg font-semibold text-lumm-text-primary">Когда</h2>
