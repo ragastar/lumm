@@ -9,11 +9,16 @@ import {
   monthIso,
 } from "../reminders";
 
-type TestMember = { id: string; displayName: string; telegramId: string | null };
+type TestMember = {
+  id: string;
+  displayName: string;
+  telegramId: string | null;
+  telegramUsername: string | null;
+};
 
-const alice: TestMember = { id: "a", displayName: "Alice", telegramId: "111" };
-const bob: TestMember = { id: "b", displayName: "Bob", telegramId: null };
-const carol: TestMember = { id: "c", displayName: "Carol", telegramId: "333" };
+const alice: TestMember = { id: "a", displayName: "Alice", telegramId: "111", telegramUsername: "alice_tg" };
+const bob: TestMember = { id: "b", displayName: "Bob", telegramId: null, telegramUsername: null };
+const carol: TestMember = { id: "c", displayName: "Carol", telegramId: "333", telegramUsername: "carol_tg" };
 
 describe("findLaggardsWeekly", () => {
   it("все сдали → пусто", () => {
@@ -61,16 +66,16 @@ describe("findLaggardsMonthly", () => {
 });
 
 describe("formatMentions", () => {
-  it("с telegramId → @displayName", () => {
-    expect(formatMentions([alice])).toBe("@Alice");
+  it("с telegramUsername → @telegramUsername", () => {
+    expect(formatMentions([alice])).toBe("@alice_tg");
   });
 
-  it("без telegramId → без @", () => {
+  it("без telegramUsername → displayName без @", () => {
     expect(formatMentions([bob])).toBe("Bob");
   });
 
-  it("смесь: запятая через пробел", () => {
-    expect(formatMentions([alice, bob, carol])).toBe("@Alice, Bob, @Carol");
+  it("смесь: запятая через пробел, @handle или имя", () => {
+    expect(formatMentions([alice, bob, carol])).toBe("@alice_tg, Bob, @carol_tg");
   });
 
   it("пустой массив → пустая строка", () => {
@@ -98,7 +103,7 @@ describe("composeMonthlyReminder", () => {
   it("включает дату встречи и список", () => {
     const msg = composeMonthlyReminder([alice, bob], "2026-04-16");
     expect(msg).toContain("16.04");
-    expect(msg).toContain("@Alice");
+    expect(msg).toContain("@alice_tg");
     expect(msg).toContain("Bob");
     expect(msg).toContain("ежемесячн");
   });

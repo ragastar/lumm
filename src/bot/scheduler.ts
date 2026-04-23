@@ -21,6 +21,7 @@ async function getActiveMembers(groupId: string): Promise<RemMember[]> {
       id: members.id,
       displayName: members.displayName,
       telegramId: members.telegramId,
+      telegramUsername: members.telegramUsername,
     })
     .from(members)
     .where(and(eq(members.groupId, groupId), eq(members.status, "active")));
@@ -50,8 +51,8 @@ async function dailyTick(): Promise<void> {
         const pool = await getActiveMembers(g.id);
         const organizer = pool.find((m) => m.id === result.organizerId);
         const organizerPart = organizer
-          ? organizer.telegramId
-            ? `@${organizer.displayName}`
+          ? organizer.telegramUsername
+            ? `@${organizer.telegramUsername}`
             : organizer.displayName
           : "ещё не назначен";
         const [y, m, d] = result.date.split("-");
