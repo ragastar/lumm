@@ -72,15 +72,26 @@ export default async function MonthlyFinancialDetailPage({
   const r = rows[0];
   const quarter = isQuarterEnd(r.month);
   const wasEdited = r.updatedAt !== r.createdAt;
+  const isOwner = r.memberId === user.id;
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <Link
-        href="/financials"
-        className="inline-flex items-center gap-2 text-sm text-lumm-text-secondary hover:text-lumm-text-primary"
-      >
-        ← К ленте ежемесячных
-      </Link>
+      <div className="flex items-center justify-between gap-4">
+        <Link
+          href="/financials"
+          className="inline-flex items-center gap-2 text-sm text-lumm-text-secondary hover:text-lumm-text-primary"
+        >
+          ← К ленте ежемесячных
+        </Link>
+        {isOwner && (
+          <Link
+            href={`/financials?month=${r.month}`}
+            className="px-4 py-2 bg-lumm-gold text-lumm-dark text-sm font-medium rounded-lg hover:bg-lumm-gold-light transition-colors"
+          >
+            Редактировать
+          </Link>
+        )}
+      </div>
 
       <div className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6 flex items-center gap-4">
         <Link href={`/members/${r.memberId}`}>

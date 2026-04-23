@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Avatar } from "@/components/Avatar";
 import { isQuarterEnd } from "@/lib/quarter";
 
@@ -99,6 +99,7 @@ function fromRecord(r: MyRecord): FormState {
 
 export function FinancialsClient({ currentMember, feed }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [month, setMonth] = useState<string>(currentMonthIso());
@@ -107,6 +108,15 @@ export function FinancialsClient({ currentMember, feed }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const quarter = isQuarterEnd(month);
+
+  // Открыть форму на конкретный месяц, если указан ?month=YYYY-MM-01 в URL
+  useEffect(() => {
+    const param = searchParams.get("month");
+    if (param && /^\d{4}-\d{2}-01$/.test(param)) {
+      setMonth(param);
+      setShowForm(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!showForm) return;
