@@ -35,9 +35,10 @@ type Props = {
     sportGoal: string | null;
   };
   mySteering: MyFeedback[];
+  myGoalSummary: { id: string; wish: string } | null;
 };
 
-export function ProfileClient({ initial, mySteering }: Props) {
+export function ProfileClient({ initial, mySteering, myGoalSummary }: Props) {
   const router = useRouter();
   const [displayName, setDisplayName] = useState(initial.displayName);
   const [avatarColor, setAvatarColor] = useState(initial.avatarColor);
@@ -333,6 +334,39 @@ export function ProfileClient({ initial, mySteering }: Props) {
           )}
         </div>
       </form>
+
+      <section className="bg-lumm-black border border-lumm-gold/30 rounded-xl p-6 space-y-3 relative overflow-hidden">
+        <div className="absolute top-3 right-3 px-2 py-0.5 text-[10px] uppercase tracking-wider bg-lumm-gold text-lumm-dark rounded font-bold">
+          NEW
+        </div>
+        <h2 className="text-lg font-semibold text-lumm-text-primary">
+          LUMM Goal System <span className="text-lumm-text-secondary font-normal">· Wombo Combo</span>
+        </h2>
+        {myGoalSummary ? (
+          <>
+            <p className="text-sm text-lumm-text-secondary leading-relaxed">Твоя структурная цель:</p>
+            <p className="text-base text-lumm-text-primary leading-snug">{myGoalSummary.wish}</p>
+            <a
+              href="/goal/my"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-lumm-gold text-lumm-dark font-medium hover:bg-lumm-gold-light transition-colors text-sm"
+            >
+              Открыть мою цель
+            </a>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-lumm-text-secondary leading-relaxed">
+              Серьёзная постановка цели на 12 недель — WOOP, HARD, 12 Week Year и две психометрические шкалы качества в одном шаблоне.
+            </p>
+            <a
+              href="/goal"
+              className="btn-shimmer inline-flex items-center gap-2 px-5 py-3 rounded-lg font-semibold text-sm"
+            >
+              Узнать и попробовать
+            </a>
+          </>
+        )}
+      </section>
 
       <section className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6 space-y-3">
         <h2 className="text-lg font-semibold text-lumm-text-primary">Мой штурвал</h2>

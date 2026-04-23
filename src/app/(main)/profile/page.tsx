@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { ProfileClient } from "./ProfileClient";
 import { db } from "@/db";
-import { feedbackItems } from "@/db/schema";
+import { feedbackItems, goalPlans } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +24,13 @@ export default async function ProfilePage() {
     .where(eq(feedbackItems.memberId, user.id))
     .orderBy(desc(feedbackItems.createdAt));
 
+  const planRows = await db
+    .select({ id: goalPlans.id, wish: goalPlans.wish })
+    .from(goalPlans)
+    .where(eq(goalPlans.memberId, user.id))
+    .limit(1);
+  const myGoalSummary = planRows.length > 0 ? { id: planRows[0].id, wish: planRows[0].wish } : null;
+
   return (
     <ProfileClient
       initial={{
@@ -36,6 +43,7 @@ export default async function ProfilePage() {
         sportGoal: user.sportGoal,
       }}
       mySteering={mySteering}
+      myGoalSummary={myGoalSummary}
     />
   );
 }
