@@ -13,9 +13,9 @@ export type ReportInput = {
   baseUrl: string;
 };
 
-export async function handleReport(input: ReportInput): Promise<void> {
+export async function handleReport(input: ReportInput): Promise<boolean> {
   const body = matchTrigger(input.text);
-  if (!body) return;
+  if (!body) return false;
 
   const rows = await db
     .select({
@@ -32,7 +32,7 @@ export async function handleReport(input: ReportInput): Promise<void> {
     await input.reply(
       "Привет. Ты не привязан к LUMM. Попроси админа вбить твой Telegram ID в /admin/members.",
     );
-    return;
+    return true;
   }
 
   const member = rows[0];
@@ -40,7 +40,7 @@ export async function handleReport(input: ReportInput): Promise<void> {
     await input.reply(
       `${member.displayName}, у тебя не заполнены цели. Зайди в ${input.baseUrl}/profile → «Мои цели». Пришли отчёт снова после.`,
     );
-    return;
+    return true;
   }
 
   const reportId = randomUUID();
@@ -86,4 +86,6 @@ export async function handleReport(input: ReportInput): Promise<void> {
       `${member.displayName}, отчёт сохранён, но анализ не получился. Посмотрим руками. Ссылка: ${input.baseUrl}/reports/${reportId}`,
     );
   }
+
+  return true;
 }

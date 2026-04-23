@@ -116,3 +116,14 @@ export const meetingAttendees = sqliteTable(
     uniqMeetingMember: uniqueIndex("uniq_meeting_member").on(table.meetingId, table.memberId),
   }),
 );
+
+export const feedbackItems = sqliteTable("feedback_items", {
+  id: text("id").primaryKey(),
+  memberId: text("member_id").notNull().references(() => members.id),
+  text: text("text").notNull(),
+  status: text("status", { enum: ["new", "in_progress", "done", "rejected"] })
+    .notNull()
+    .default("new"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});

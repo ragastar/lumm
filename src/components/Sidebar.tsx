@@ -19,6 +19,7 @@ const activeNav: NavItem[] = [
   { href: "/financials", label: "Ежемесячные", icon: "◈" },
   { href: "/analytics", label: "Аналитика", icon: "◈" },
   { href: "/calendar", label: "Календарь", icon: "◎" },
+  { href: "/feedback", label: "Штурвал", icon: "⚓" },
   { href: "/members", label: "Участники", icon: "◐", badge: "NEW" },
   { href: "/constitution", label: "Конституция", icon: "◩" },
   { href: "/help", label: "Как это работает", icon: "?" },

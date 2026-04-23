@@ -9,6 +9,21 @@ const AVATAR_COLORS = [
   "#c678dd", "#e5c07b", "#56b6c2", "#be5046",
 ];
 
+type MyFeedback = {
+  id: string;
+  text: string;
+  status: "new" | "in_progress" | "done" | "rejected";
+  createdAt: string;
+};
+
+const STATUS_LABEL = { new: "Новый", in_progress: "В работе", done: "Готово", rejected: "Отклонено" } as const;
+const STATUS_CLASS = {
+  new: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+  in_progress: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
+  done: "bg-green-500/10 text-green-400 border-green-500/30",
+  rejected: "bg-red-500/10 text-red-400 border-red-500/30",
+} as const;
+
 type Props = {
   initial: {
     displayName: string;
@@ -19,9 +34,10 @@ type Props = {
     businessGoal: string | null;
     sportGoal: string | null;
   };
+  mySteering: MyFeedback[];
 };
 
-export function ProfileClient({ initial }: Props) {
+export function ProfileClient({ initial, mySteering }: Props) {
   const router = useRouter();
   const [displayName, setDisplayName] = useState(initial.displayName);
   const [avatarColor, setAvatarColor] = useState(initial.avatarColor);
@@ -317,6 +333,31 @@ export function ProfileClient({ initial }: Props) {
           )}
         </div>
       </form>
+
+      <section className="bg-lumm-black border border-lumm-gray-light rounded-xl p-6 space-y-3">
+        <h2 className="text-lg font-semibold text-lumm-text-primary">Мой штурвал</h2>
+        <p className="text-xs text-lumm-text-secondary">
+          Идеи / баги / правки через бот:{" "}
+          <code className="text-lumm-gold">@lummbrain_bot штурвал &lt;текст&gt;</code>
+        </p>
+        {mySteering.length === 0 ? (
+          <p className="text-sm text-lumm-text-secondary">Пока пусто.</p>
+        ) : (
+          <ul className="space-y-2">
+            {mySteering.map((it) => (
+              <li key={it.id} className="text-sm text-lumm-text-primary">
+                <span className={`px-2 py-0.5 rounded-full text-xs border mr-2 ${STATUS_CLASS[it.status]}`}>
+                  {STATUS_LABEL[it.status]}
+                </span>
+                <span className="text-xs text-lumm-text-secondary mr-2">
+                  {new Date(it.createdAt).toLocaleDateString("ru-RU")}
+                </span>
+                <span className="whitespace-pre-wrap">{it.text}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {initial.hasPassword && (
         <form
