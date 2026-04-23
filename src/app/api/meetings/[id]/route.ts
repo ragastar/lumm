@@ -5,6 +5,7 @@ import { meetings, members } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 const ALLOWED_KIND = new Set(["standard", "ad_hoc"]);
 const ALLOWED_STATUS = new Set(["scheduled", "completed", "cancelled"]);
 
@@ -62,13 +63,43 @@ export async function PATCH(
     update.status = body.status;
   }
 
+  if (body.timeStart !== undefined) {
+    if (typeof body.timeStart !== "string" || !TIME_HHMM.test(body.timeStart)) {
+      return Response.json({ error: "timeStart должен быть в формате HH:MM" }, { status: 400 });
+    }
+    update.timeStart = body.timeStart;
+  }
+
+  if (body.timeEnd !== undefined) {
+    if (typeof body.timeEnd !== "string" || !TIME_HHMM.test(body.timeEnd)) {
+      return Response.json({ error: "timeEnd должен быть в формате HH:MM" }, { status: 400 });
+    }
+    update.timeEnd = body.timeEnd;
+  }
+
+  if (typeof update.timeStart === "string" && typeof update.timeEnd === "string") {
+    if (update.timeStart >= update.timeEnd) {
+      return Response.json(
+        { error: "Время окончания должно быть позже времени начала" },
+        { status: 400 },
+      );
+    }
+  }
+
   if (body.location !== undefined) {
-    if (body.location === null || body.location === "") {
-      update.location = null;
-    } else if (typeof body.location === "string") {
-      update.location = body.location;
+    if (typeof body.location !== "string" || body.location.trim() === "") {
+      return Response.json({ error: "Адрес обязательный" }, { status: 400 });
+    }
+    update.location = body.location.trim();
+  }
+
+  if (body.price !== undefined) {
+    if (body.price === null || body.price === "") {
+      update.price = null;
+    } else if (typeof body.price === "number" && Number.isFinite(body.price) && body.price >= 0) {
+      update.price = body.price;
     } else {
-      return Response.json({ error: "location должен быть строкой или null" }, { status: 400 });
+      return Response.json({ error: "Цена должна быть неотрицательным числом или null" }, { status: 400 });
     }
   }
 
