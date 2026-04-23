@@ -114,4 +114,29 @@ describe("validateGoalPlanPayload", () => {
     expect(validateGoalPlanPayload({ ...validBody, data: "не объект" }).ok).toBe(false);
     expect(validateGoalPlanPayload({ ...validBody, data: null }).ok).toBe(false);
   });
+
+  test("difficulty NaN / Infinity / float → error", () => {
+    expect(validateGoalPlanPayload({ ...validBody, difficulty: NaN }).ok).toBe(false);
+    expect(validateGoalPlanPayload({ ...validBody, difficulty: Infinity }).ok).toBe(false);
+    expect(validateGoalPlanPayload({ ...validBody, difficulty: -Infinity }).ok).toBe(false);
+    expect(validateGoalPlanPayload({ ...validBody, difficulty: 7.5 }).ok).toBe(false);
+  });
+
+  test("числовые поля как строка → error", () => {
+    expect(validateGoalPlanPayload({ ...validBody, difficulty: "7" }).ok).toBe(false);
+    expect(validateGoalPlanPayload({ ...validBody, sciShame: "3" }).ok).toBe(false);
+    expect(validateGoalPlanPayload({ ...validBody, klein1: "4" }).ok).toBe(false);
+  });
+
+  test("data как массив → error (Array.isArray защита)", () => {
+    expect(validateGoalPlanPayload({ ...validBody, data: [] }).ok).toBe(false);
+    expect(validateGoalPlanPayload({ ...validBody, data: [1, 2, 3] }).ok).toBe(false);
+  });
+
+  test("data: undefined / отсутствует → error", () => {
+    const noDataBody = { ...validBody } as Record<string, unknown>;
+    delete noDataBody.data;
+    expect(validateGoalPlanPayload(noDataBody).ok).toBe(false);
+    expect(validateGoalPlanPayload({ ...validBody, data: undefined }).ok).toBe(false);
+  });
 });
