@@ -33,3 +33,28 @@ button:not(:disabled),
 a {
   cursor: pointer;
 }
+
+@keyframes lumm-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.btn-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--lumm-gold) 0%,
+    var(--lumm-gold-light) 50%,
+    var(--lumm-gold) 100%
+  );
+  background-size: 200% 100%;
+  animation: lumm-shimmer 2.4s linear infinite;
+  color: var(--lumm-dark);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-shimmer {
+    animation: none;
+    background-image: none;
+    background-color: var(--lumm-gold);
+  }
+}
