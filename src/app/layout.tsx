@@ -6,9 +6,16 @@ export const metadata: Metadata = {
   description: "Mastermind group management platform",
 };
 
+// Inline-скрипт: читаем localStorage и выставляем data-theme до первой отрисовки,
+// чтобы избежать flash нежелательной темы при загрузке.
+const themeInitScript = `(function(){try{var t=localStorage.getItem('lumm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru">
+    <html lang="ru" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-screen bg-lumm-dark">
         {children}
       </body>

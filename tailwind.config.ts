@@ -6,15 +6,15 @@ const config: Config = {
     extend: {
       colors: {
         lumm: {
-          black: "#1a1a1a",
-          dark: "#0d0d0d",
-          gold: "#c9a84c",
-          "gold-light": "#e0c068",
-          "gold-dark": "#a68a3a",
-          gray: "#2a2a2a",
-          "gray-light": "#3a3a3a",
-          "text-primary": "#f5f5f5",
-          "text-secondary": "#999999",
+          black: "var(--lumm-black)",
+          dark: "var(--lumm-dark)",
+          gold: "var(--lumm-gold)",
+          "gold-light": "var(--lumm-gold-light)",
+          "gold-dark": "var(--lumm-gold-dark)",
+          gray: "var(--lumm-gray)",
+          "gray-light": "var(--lumm-gray-light)",
+          "text-primary": "var(--lumm-text-primary)",
+          "text-secondary": "var(--lumm-text-secondary)",
         },
       },
       fontFamily: {

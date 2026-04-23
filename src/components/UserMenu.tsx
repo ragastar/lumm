@@ -15,6 +15,7 @@ type Member = {
 export function UserMenu() {
   const [current, setCurrent] = useState<Member | null>(null);
   const [open, setOpen] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const router = useRouter();
 
   useEffect(() => {
@@ -22,6 +23,24 @@ export function UserMenu() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => setCurrent(data));
   }, []);
+
+  useEffect(() => {
+    // Синхронизируем state с тем, что уже выставлено inline-скриптом в layout.
+    const current = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+    setTheme(current);
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    if (next === "light") {
+      document.documentElement.setAttribute("data-theme", "light");
+      localStorage.setItem("lumm-theme", "light");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+      localStorage.setItem("lumm-theme", "dark");
+    }
+  };
 
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -83,6 +102,15 @@ export function UserMenu() {
               </button>
             </>
           )}
+          <button
+            onClick={() => {
+              toggleTheme();
+              setOpen(false);
+            }}
+            className="w-full text-left px-3 py-2 text-sm text-lumm-text-primary hover:bg-lumm-gray-light transition-colors border-t border-lumm-gray-light/50"
+          >
+            {theme === "light" ? "🌙 Тёмная тема" : "☀️ Светлая тема"}
+          </button>
           <button
             onClick={logout}
             className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-lumm-gray-light transition-colors"
