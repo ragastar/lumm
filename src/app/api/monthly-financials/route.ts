@@ -4,17 +4,42 @@ import { db } from "@/db";
 import { monthlyFinancials, members } from "@/db/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { randomUUID } from "crypto";
-import { getCurrentMemberId } from "@/lib/session";
+import { getCurrentMemberId, getCurrentUser } from "@/lib/session";
 import { validateMonthlyFinancialsBody } from "@/lib/monthlyFinancials";
 
 export async function GET(request: NextRequest) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return Response.json({ error: "Нет сессии" }, { status: 401 });
+  }
+
   const memberId = request.nextUrl.searchParams.get("memberId");
 
   if (memberId) {
     const rows = await db
-      .select()
+      .select({
+        id: monthlyFinancials.id,
+        memberId: monthlyFinancials.memberId,
+        month: monthlyFinancials.month,
+        revenue: monthlyFinancials.revenue,
+        netProfit: monthlyFinancials.netProfit,
+        capital: monthlyFinancials.capital,
+        scoreBusiness: monthlyFinancials.scoreBusiness,
+        scoreFamily: monthlyFinancials.scoreFamily,
+        scorePersonal: monthlyFinancials.scorePersonal,
+        reportText: monthlyFinancials.reportText,
+        requestText: monthlyFinancials.requestText,
+        createdAt: monthlyFinancials.createdAt,
+        updatedAt: monthlyFinancials.updatedAt,
+      })
       .from(monthlyFinancials)
-      .where(eq(monthlyFinancials.memberId, memberId))
+      .innerJoin(members, eq(members.id, monthlyFinancials.memberId))
+      .where(
+        and(
+          eq(monthlyFinancials.memberId, memberId),
+          eq(members.groupId, user.groupId),
+        ),
+      )
       .orderBy(desc(monthlyFinancials.month));
     return Response.json(rows);
   }
@@ -38,7 +63,8 @@ export async function GET(request: NextRequest) {
       memberAvatarColor: members.avatarColor,
     })
     .from(monthlyFinancials)
-    .leftJoin(members, eq(monthlyFinancials.memberId, members.id))
+    .innerJoin(members, eq(monthlyFinancials.memberId, members.id))
+    .where(eq(members.groupId, user.groupId))
     .orderBy(desc(monthlyFinancials.month));
 
   return Response.json(rows);
