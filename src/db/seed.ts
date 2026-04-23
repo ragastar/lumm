@@ -99,6 +99,14 @@ sqlite.exec(`
   );
   CREATE UNIQUE INDEX IF NOT EXISTS uniq_meeting_member
     ON meeting_attendees(meeting_id, member_id);
+  CREATE TABLE IF NOT EXISTS feedback_items (
+    id TEXT PRIMARY KEY,
+    member_id TEXT NOT NULL REFERENCES members(id),
+    text TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'new',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
 `);
 
 const now = new Date().toISOString();
