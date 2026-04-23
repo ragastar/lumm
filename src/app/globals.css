@@ -2,6 +2,28 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
+:root {
+  --lumm-dark: #0d0d0d;
+  --lumm-black: #1a1a1a;
+  --lumm-gray: #2a2a2a;
+  --lumm-gray-light: #3a3a3a;
+  --lumm-text-primary: #f5f5f5;
+  --lumm-text-secondary: #999999;
+  --lumm-gold: #c9a84c;
+  --lumm-gold-light: #e0c068;
+  --lumm-gold-dark: #a68a3a;
+}
+
+[data-theme="light"] {
+  --lumm-dark: #f5f5f5;
+  --lumm-black: #ffffff;
+  --lumm-gray: #eaeaea;
+  --lumm-gray-light: #d4d4d4;
+  --lumm-text-primary: #1a1a1a;
+  --lumm-text-secondary: #666666;
+  /* gold-палитра остаётся прежней — читается на обоих фонах */
+}
+
 body {
   @apply bg-lumm-dark text-lumm-text-primary font-sans;
 }
