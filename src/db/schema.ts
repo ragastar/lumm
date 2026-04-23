@@ -82,6 +82,7 @@ export const meetings = sqliteTable("meetings", {
   organizerId: text("organizer_id").references(() => members.id),
   location: text("location"),
   status: text("status", { enum: ["scheduled", "completed", "cancelled"] }).notNull().default("scheduled"),
+  kind: text("kind", { enum: ["standard", "ad_hoc"] }).notNull().default("standard"),
   createdAt: text("created_at").notNull(),
 });
 
