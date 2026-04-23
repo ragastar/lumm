@@ -6,6 +6,7 @@ import { meetings, members } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 const ALLOWED_KIND = new Set(["standard", "ad_hoc"]);
 
 export async function GET() {
@@ -19,8 +20,11 @@ export async function GET() {
       id: meetings.id,
       groupId: meetings.groupId,
       date: meetings.date,
+      timeStart: meetings.timeStart,
+      timeEnd: meetings.timeEnd,
       organizerId: meetings.organizerId,
       location: meetings.location,
+      price: meetings.price,
       status: meetings.status,
       kind: meetings.kind,
       createdAt: meetings.createdAt,
@@ -51,6 +55,34 @@ export async function POST(request: Request) {
     return Response.json({ error: "date должен быть в формате YYYY-MM-DD" }, { status: 400 });
   }
 
+  if (typeof body.timeStart !== "string" || !TIME_HHMM.test(body.timeStart)) {
+    return Response.json({ error: "timeStart должен быть в формате HH:MM" }, { status: 400 });
+  }
+
+  if (typeof body.timeEnd !== "string" || !TIME_HHMM.test(body.timeEnd)) {
+    return Response.json({ error: "timeEnd должен быть в формате HH:MM" }, { status: 400 });
+  }
+
+  if (body.timeStart >= body.timeEnd) {
+    return Response.json(
+      { error: "Время окончания должно быть позже времени начала" },
+      { status: 400 },
+    );
+  }
+
+  if (typeof body.location !== "string" || body.location.trim() === "") {
+    return Response.json({ error: "Адрес обязательный" }, { status: 400 });
+  }
+  const location = body.location.trim();
+
+  let price: number | null = null;
+  if (body.price !== null && body.price !== undefined && body.price !== "") {
+    if (typeof body.price !== "number" || !Number.isFinite(body.price) || body.price < 0) {
+      return Response.json({ error: "Цена должна быть неотрицательным числом" }, { status: 400 });
+    }
+    price = body.price;
+  }
+
   const kind = body.kind ?? "standard";
   if (typeof kind !== "string" || !ALLOWED_KIND.has(kind)) {
     return Response.json({ error: "kind должен быть standard или ad_hoc" }, { status: 400 });
@@ -76,13 +108,6 @@ export async function POST(request: Request) {
     organizerId = body.organizerId;
   }
 
-  const location =
-    body.location === null || body.location === undefined || body.location === ""
-      ? null
-      : typeof body.location === "string"
-        ? body.location
-        : null;
-
   const id = randomUUID();
   const now = new Date().toISOString();
 
@@ -90,8 +115,11 @@ export async function POST(request: Request) {
     id,
     groupId: user.groupId,
     date: body.date,
+    timeStart: body.timeStart,
+    timeEnd: body.timeEnd,
     organizerId,
     location,
+    price,
     status: "scheduled",
     kind: kind as "standard" | "ad_hoc",
     createdAt: now,
@@ -102,8 +130,11 @@ export async function POST(request: Request) {
       id,
       groupId: user.groupId,
       date: body.date,
+      timeStart: body.timeStart,
+      timeEnd: body.timeEnd,
       organizerId,
       location,
+      price,
       status: "scheduled",
       kind,
       createdAt: now,

@@ -7,8 +7,11 @@ import { useRouter } from "next/navigation";
 type Meeting = {
   id: string;
   date: string;
+  timeStart: string;
+  timeEnd: string;
   organizerId: string | null;
   location: string | null;
+  price: number | null;
   status: "scheduled" | "completed" | "cancelled";
   kind: "standard" | "ad_hoc";
   organizerDisplayName: string | null;
@@ -19,7 +22,16 @@ type PoolMember = { id: string; displayName: string };
 type Props = {
   meetings: Meeting[];
   pool: PoolMember[];
+  activeMembersCount: number;
 };
+
+function formatRub(n: number): string {
+  return new Intl.NumberFormat("ru-RU", {
+    style: "currency",
+    currency: "RUB",
+    maximumFractionDigits: 0,
+  }).format(n);
+}
 
 function daysUntil(dateStr: string): number {
   const now = new Date();
@@ -64,21 +76,27 @@ function today(): string {
 type FormState = {
   id: string | null; // null = создание
   date: string;
+  timeStart: string;
+  timeEnd: string;
   kind: "standard" | "ad_hoc";
   organizerId: string;
   location: string;
+  price: string;
   status: "scheduled" | "completed" | "cancelled";
 };
 
 const EMPTY_FORM: Omit<FormState, "date"> = {
   id: null,
+  timeStart: "19:00",
+  timeEnd: "21:00",
   kind: "ad_hoc",
   organizerId: "",
   location: "",
+  price: "",
   status: "scheduled",
 };
 
-export function CalendarClient({ meetings, pool }: Props) {
+export function CalendarClient({ meetings, pool, activeMembersCount }: Props) {
   const router = useRouter();
   const [form, setForm] = useState<FormState | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -96,9 +114,12 @@ export function CalendarClient({ meetings, pool }: Props) {
     setForm({
       id: m.id,
       date: m.date,
+      timeStart: m.timeStart,
+      timeEnd: m.timeEnd,
       kind: m.kind,
       organizerId: m.organizerId ?? "",
       location: m.location ?? "",
+      price: m.price != null ? String(m.price) : "",
       status: m.status,
     });
     setError(null);
@@ -117,9 +138,12 @@ export function CalendarClient({ meetings, pool }: Props) {
 
     const payload: Record<string, unknown> = {
       date: form.date,
+      timeStart: form.timeStart,
+      timeEnd: form.timeEnd,
       kind: form.kind,
       organizerId: form.organizerId || null,
-      location: form.location || null,
+      location: form.location.trim(),
+      price: form.price === "" ? null : Number(form.price),
     };
     if (form.id) payload.status = form.status;
 
@@ -197,13 +221,26 @@ export function CalendarClient({ meetings, pool }: Props) {
                     <p className="text-xs text-lumm-text-secondary uppercase tracking-wide mb-1">
                       {m.kind === "standard" ? "Стандартная" : "Ad-hoc"}
                     </p>
-                    <p className="text-lg text-lumm-text-primary">{formatDate(m.date)}</p>
+                    <p className="text-lg text-lumm-text-primary">
+                      {formatDate(m.date)} · {m.timeStart}–{m.timeEnd}
+                    </p>
                     <p className="text-sm text-lumm-text-secondary mt-1">{formatCountdown(days)}</p>
                     <p className="text-sm text-lumm-text-secondary mt-2">
                       Организатор: {m.organizerDisplayName ?? "не назначен"}
                     </p>
-                    {m.location && (
-                      <p className="text-sm text-lumm-text-secondary">Место: {m.location}</p>
+                    <p className="text-sm text-lumm-text-secondary">
+                      Адрес: {m.location ?? "не указан"}
+                    </p>
+                    {m.price != null && m.price > 0 && (
+                      <p className="text-sm text-lumm-text-secondary">
+                        Цена: {formatRub(m.price)}
+                        {activeMembersCount > 0 && (
+                          <span className="text-lumm-gold">
+                            {" "}
+                            ({formatRub(m.price / activeMembersCount)} / чел)
+                          </span>
+                        )}
+                      </p>
                     )}
                   </div>
                   <div className="flex gap-2 shrink-0">
@@ -243,7 +280,9 @@ export function CalendarClient({ meetings, pool }: Props) {
                     <span className="text-xs text-lumm-text-secondary mr-2">
                       {m.kind === "standard" ? "ст." : "ad-hoc"}
                     </span>
-                    <span className="text-sm text-lumm-text-primary">{formatDate(m.date)}</span>
+                    <span className="text-sm text-lumm-text-primary">
+                      {formatDate(m.date)} · {m.timeStart}–{m.timeEnd}
+                    </span>
                     {m.organizerDisplayName && (
                       <span className="text-sm text-lumm-text-secondary ml-2">
                         · {m.organizerDisplayName}
@@ -291,6 +330,29 @@ export function CalendarClient({ meetings, pool }: Props) {
               />
             </div>
 
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm text-lumm-text-secondary mb-1">Время начала</label>
+                <input
+                  type="time"
+                  required
+                  value={form.timeStart}
+                  onChange={(e) => setForm({ ...form, timeStart: e.target.value })}
+                  className="w-full bg-lumm-gray border border-lumm-gray-light rounded-lg px-3 py-2 text-lumm-text-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-lumm-text-secondary mb-1">Время окончания</label>
+                <input
+                  type="time"
+                  required
+                  value={form.timeEnd}
+                  onChange={(e) => setForm({ ...form, timeEnd: e.target.value })}
+                  className="w-full bg-lumm-gray border border-lumm-gray-light rounded-lg px-3 py-2 text-lumm-text-primary"
+                />
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm text-lumm-text-secondary mb-1">Тип</label>
               <div className="flex gap-4 text-sm">
@@ -332,15 +394,35 @@ export function CalendarClient({ meetings, pool }: Props) {
             </div>
 
             <div>
-              <label className="block text-sm text-lumm-text-secondary mb-1">
-                Место (опционально)
-              </label>
+              <label className="block text-sm text-lumm-text-secondary mb-1">Адрес *</label>
               <input
                 type="text"
+                required
                 value={form.location}
                 onChange={(e) => setForm({ ...form, location: e.target.value })}
+                placeholder="напр. кафе «Место», ул. Пушкина 10"
                 className="w-full bg-lumm-gray border border-lumm-gray-light rounded-lg px-3 py-2 text-lumm-text-primary"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm text-lumm-text-secondary mb-1">
+                Цена, ₽ (опционально)
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={form.price}
+                onChange={(e) => setForm({ ...form, price: e.target.value })}
+                placeholder="общая сумма на всех"
+                className="w-full bg-lumm-gray border border-lumm-gray-light rounded-lg px-3 py-2 text-lumm-text-primary"
+              />
+              {form.price !== "" && Number(form.price) > 0 && activeMembersCount > 0 && (
+                <p className="text-xs text-lumm-text-secondary mt-1">
+                  Делится на {activeMembersCount}: {formatRub(Number(form.price) / activeMembersCount)} / чел
+                </p>
+              )}
             </div>
 
             {form.id && (

@@ -80,8 +80,11 @@ sqlite.exec(`
     id TEXT PRIMARY KEY,
     group_id TEXT NOT NULL REFERENCES groups(id),
     date TEXT NOT NULL,
+    time_start TEXT NOT NULL DEFAULT '19:00',
+    time_end TEXT NOT NULL DEFAULT '21:00',
     organizer_id TEXT REFERENCES members(id),
     location TEXT,
+    price REAL,
     status TEXT NOT NULL DEFAULT 'scheduled',
     kind TEXT NOT NULL DEFAULT 'standard',
     created_at TEXT NOT NULL

@@ -6,7 +6,19 @@ import { nextOrganizer, nextThirdThursday, formatDateIso, type PoolMember } from
 
 export type EnsureResult =
   | { created: false }
-  | { created: true; meetingId: string; organizerId: string | null; date: string };
+  | {
+      created: true;
+      meetingId: string;
+      organizerId: string | null;
+      date: string;
+      timeStart: string;
+      timeEnd: string;
+      location: string | null;
+      price: number | null;
+    };
+
+const DEFAULT_TIME_START = "19:00";
+const DEFAULT_TIME_END = "21:00";
 
 export async function ensureNextMeeting(groupId: string): Promise<EnsureResult> {
   const today = formatDateIso(new Date());
@@ -52,14 +64,26 @@ export async function ensureNextMeeting(groupId: string): Promise<EnsureResult> 
     id: meetingId,
     groupId,
     date,
+    timeStart: DEFAULT_TIME_START,
+    timeEnd: DEFAULT_TIME_END,
     organizerId,
     location: null,
+    price: null,
     status: "scheduled",
     kind: "standard",
     createdAt: now,
   });
 
-  return { created: true, meetingId, organizerId, date };
+  return {
+    created: true,
+    meetingId,
+    organizerId,
+    date,
+    timeStart: DEFAULT_TIME_START,
+    timeEnd: DEFAULT_TIME_END,
+    location: null,
+    price: null,
+  };
 }
 
 export async function findMeetingInNDays(

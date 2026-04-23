@@ -56,9 +56,17 @@ async function dailyTick(): Promise<void> {
             : organizer.displayName
           : "ещё не назначен";
         const [y, m, d] = result.date.split("-");
-        await sendToGroup(
-          `Следующий мастермайнд: ${d}.${m}.${y} (четверг), ведёт ${organizerPart}.`,
-        );
+        const lines = [
+          `Следующий мастермайнд: ${d}.${m}.${y} (четверг), ${result.timeStart}–${result.timeEnd}`,
+          `Ведёт: ${organizerPart}`,
+          `Адрес: ${result.location ?? "не указан"}`,
+        ];
+        if (result.price !== null && result.price > 0 && pool.length > 0) {
+          const perPerson = Math.round(result.price / pool.length);
+          lines.push(`Цена: ${result.price} ₽ (${perPerson} ₽/чел)`);
+        }
+        lines.push(`Детали и правки: https://lumm.space/calendar`);
+        await sendToGroup(lines.join("\n"));
       }
     } catch (err) {
       console.error(`[scheduler] ensureNextMeeting for group ${g.id} failed:`, err);

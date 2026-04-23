@@ -16,8 +16,11 @@ export default async function CalendarPage() {
     .select({
       id: meetings.id,
       date: meetings.date,
+      timeStart: meetings.timeStart,
+      timeEnd: meetings.timeEnd,
       organizerId: meetings.organizerId,
       location: meetings.location,
+      price: meetings.price,
       status: meetings.status,
       kind: meetings.kind,
       organizerDisplayName: members.displayName,
@@ -33,5 +36,5 @@ export default async function CalendarPage() {
     .where(and(eq(members.groupId, user.groupId), eq(members.status, "active")))
     .orderBy(members.createdAt);
 
-  return <CalendarClient meetings={all} pool={pool} />;
+  return <CalendarClient meetings={all} pool={pool} activeMembersCount={pool.length} />;
 }
