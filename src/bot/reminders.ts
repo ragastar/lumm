@@ -1,6 +1,11 @@
 import { formatDateIso } from "@/lib/rotation";
 
-export type RemMember = { id: string; displayName: string; telegramId: string | null };
+export type RemMember = {
+  id: string;
+  displayName: string;
+  telegramId: string | null;
+  telegramUsername: string | null;
+};
 export type RemWeeklyReport = { memberId: string; weekStart: string };
 export type RemMonthlyFinancial = { memberId: string; month: string };
 
@@ -28,7 +33,7 @@ export function findLaggardsMonthly(
 
 export function formatMentions(laggards: RemMember[]): string {
   return laggards
-    .map((m) => (m.telegramId ? `@${m.displayName}` : m.displayName))
+    .map((m) => (m.telegramUsername ? `@${m.telegramUsername}` : m.displayName))
     .join(", ");
 }
 

@@ -12,6 +12,7 @@ export const members = sqliteTable("members", {
   id: text("id").primaryKey(),
   groupId: text("group_id").notNull().references(() => groups.id),
   telegramId: text("telegram_id"),
+  telegramUsername: text("telegram_username"),
   username: text("username"),
   passwordHash: text("password_hash"),
   displayName: text("display_name").notNull(),

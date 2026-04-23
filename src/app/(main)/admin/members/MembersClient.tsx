@@ -11,6 +11,7 @@ type Member = {
   avatarColor: string;
   createdAt: string;
   telegramId: string | null;
+  telegramUsername: string | null;
 };
 
 function formatDate(iso: string): string {
@@ -36,6 +37,8 @@ export function MembersClient({
   const [activating, setActivating] = useState(false);
   const [tgDrafts, setTgDrafts] = useState<Record<string, string>>({});
   const [tgBusy, setTgBusy] = useState<string | null>(null);
+  const [tgUserDrafts, setTgUserDrafts] = useState<Record<string, string>>({});
+  const [tgUserBusy, setTgUserBusy] = useState<string | null>(null);
 
   const resetPassword = async (member: Member) => {
     setBusyId(member.id);
@@ -117,6 +120,24 @@ export function MembersClient({
     }
   };
 
+  const saveTelegramUsername = async (memberId: string) => {
+    const draft = tgUserDrafts[memberId] ?? "";
+    setTgUserBusy(memberId);
+    const res = await fetch(`/api/admin/members/${memberId}/telegram-username`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ telegramUsername: draft.trim() || null }),
+    });
+    setTgUserBusy(null);
+    if (res.ok) {
+      alert("@username сохранён");
+      location.reload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Ошибка: ${data.error || res.statusText}`);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -146,6 +167,7 @@ export function MembersClient({
                 <th className="text-left px-4 py-3 font-normal">Статус</th>
                 <th className="text-left px-4 py-3 font-normal">Создан</th>
                 <th className="text-left p-3 text-sm text-lumm-text-secondary">Telegram ID</th>
+                <th className="text-left p-3 text-sm text-lumm-text-secondary">@username</th>
                 <th className="text-right px-4 py-3 font-normal">Действия</th>
               </tr>
             </thead>
@@ -200,6 +222,26 @@ export function MembersClient({
                           className="text-xs bg-lumm-gray-light px-2 py-1 rounded disabled:opacity-50"
                         >
                           {tgBusy === m.id ? "..." : "✓"}
+                        </button>
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          defaultValue={m.telegramUsername ?? ""}
+                          onChange={(e) =>
+                            setTgUserDrafts({ ...tgUserDrafts, [m.id]: e.target.value })
+                          }
+                          placeholder="напр. s_lipin"
+                          className="bg-lumm-gray-dark border border-lumm-gray-light rounded px-2 py-1 text-sm w-32"
+                        />
+                        <button
+                          onClick={() => saveTelegramUsername(m.id)}
+                          disabled={tgUserBusy === m.id}
+                          className="text-xs bg-lumm-gray-light px-2 py-1 rounded disabled:opacity-50"
+                        >
+                          {tgUserBusy === m.id ? "..." : "✓"}
                         </button>
                       </div>
                     </td>

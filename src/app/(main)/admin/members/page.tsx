@@ -23,6 +23,7 @@ export default async function AdminMembersPage() {
       avatarColor: members.avatarColor,
       createdAt: members.createdAt,
       telegramId: members.telegramId,
+      telegramUsername: members.telegramUsername,
     })
     .from(members)
     .where(eq(members.groupId, user.groupId));

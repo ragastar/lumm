@@ -25,6 +25,7 @@ sqlite.exec(`
     id TEXT PRIMARY KEY,
     group_id TEXT NOT NULL REFERENCES groups(id),
     telegram_id TEXT,
+    telegram_username TEXT,
     username TEXT,
     password_hash TEXT,
     display_name TEXT NOT NULL,
