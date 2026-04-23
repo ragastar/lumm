@@ -50,8 +50,8 @@ type WizardData = {
 };
 
 const wizardStyles = `
-.font-display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }
-.font-body { font-family: 'Manrope', system-ui, sans-serif; }
+.font-display { font-family: var(--font-fraunces), Georgia, serif; font-optical-sizing: auto; }
+.font-body   { font-family: var(--font-manrope), system-ui, sans-serif; }
 
 .step-enter { animation: stepEnter 400ms cubic-bezier(0.2, 0.7, 0.3, 1); }
 @keyframes stepEnter {
@@ -1056,6 +1056,16 @@ ${data.nonGoals.filter((g) => g).map((g, i) => `${i + 1}. ${g}`).join("\n") || "
         coherenceWide: data.coherenceWide,
         nonGoals: data.nonGoals,
         confirm: data.confirm,
+        // Сохраняем raw slider-значения в data JSON — иначе edit-flow не восстановит положения слайдеров
+        sciShame: data.sciShame,
+        sciExternal: data.sciExternal,
+        sciIdentified: data.sciIdentified,
+        sciIntrinsic: data.sciIntrinsic,
+        klein1: data.klein1,
+        klein2: data.klein2,
+        klein3: data.klein3,
+        klein4: data.klein4,
+        difficulty: data.difficulty,
       },
     };
 
