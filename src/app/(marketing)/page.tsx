@@ -23,6 +23,19 @@ export const metadata: Metadata = {
   title: "LUMM — закрытый мастермайнд для предпринимателей",
   description:
     "Закрытый клуб 8–10 мужчин-предпринимателей. 12 встреч в год, личный софт для постановки целей, отчётов и финансов.",
+  openGraph: {
+    title: "LUMM — закрытый мастермайнд",
+    description: "Мастермайнд, в который не попадают за деньги.",
+    url: "https://lumm.space/",
+    siteName: "LUMM",
+    locale: "ru_RU",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LUMM — закрытый мастермайнд",
+    description: "Мастермайнд, в который не попадают за деньги.",
+  },
 };
 
 export default function LandingPage() {
