@@ -12,6 +12,7 @@ import { WeeklyReportBlock } from "@/components/landing/WeeklyReportBlock";
 import { FinancialsBlock } from "@/components/landing/FinancialsBlock";
 import { SteeringBlock } from "@/components/landing/SteeringBlock";
 import { SmartCalendarBlock } from "@/components/landing/SmartCalendarBlock";
+import { FinesBlock } from "@/components/landing/FinesBlock";
 
 export const metadata: Metadata = {
   title: "LUMM — закрытый мастермайнд для предпринимателей",
@@ -35,6 +36,7 @@ export default function LandingPage() {
       <FinancialsBlock />
       <SteeringBlock />
       <SmartCalendarBlock />
+      <FinesBlock />
     </div>
   );
 }
