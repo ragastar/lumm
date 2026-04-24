@@ -13,6 +13,11 @@ import { FinancialsBlock } from "@/components/landing/FinancialsBlock";
 import { SteeringBlock } from "@/components/landing/SteeringBlock";
 import { SmartCalendarBlock } from "@/components/landing/SmartCalendarBlock";
 import { FinesBlock } from "@/components/landing/FinesBlock";
+import { HowToJoinBlock } from "@/components/landing/HowToJoinBlock";
+import { ConditionsBlock } from "@/components/landing/ConditionsBlock";
+import { IntakeWindowBlock } from "@/components/landing/IntakeWindowBlock";
+import { FaqBlock } from "@/components/landing/FaqBlock";
+import { FinalCtaBlock } from "@/components/landing/FinalCtaBlock";
 
 export const metadata: Metadata = {
   title: "LUMM — закрытый мастермайнд для предпринимателей",
@@ -37,6 +42,11 @@ export default function LandingPage() {
       <SteeringBlock />
       <SmartCalendarBlock />
       <FinesBlock />
+      <HowToJoinBlock />
+      <ConditionsBlock />
+      <IntakeWindowBlock />
+      <FaqBlock />
+      <FinalCtaBlock />
     </div>
   );
 }
