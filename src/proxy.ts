@@ -4,7 +4,8 @@ import { jwtVerify } from "jose";
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || "dev-secret");
 
-const publicPaths = ["/login", "/invite", "/api/auth"];
+const publicPrefixes = ["/login", "/invite", "/api/auth"];
+const publicExact = ["/"];
 
 function isPublicInviteApi(pathname: string): boolean {
   // GET /api/invites/[token] — проверка валидности (публично)
@@ -17,7 +18,11 @@ function isPublicInviteApi(pathname: string): boolean {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (publicPaths.some((p) => pathname.startsWith(p))) {
+  if (publicExact.includes(pathname)) {
+    return NextResponse.next();
+  }
+
+  if (publicPrefixes.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
   }
 
