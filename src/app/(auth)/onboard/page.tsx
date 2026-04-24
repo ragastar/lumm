@@ -39,7 +39,7 @@ export default function OnboardPage() {
     const data = await res.json();
 
     if (res.ok) {
-      router.push("/");
+      router.push("/dashboard");
     } else {
       setError(data.error || "Ошибка сохранения");
       setLoading(false);

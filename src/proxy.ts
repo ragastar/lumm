@@ -44,7 +44,7 @@ export async function proxy(request: NextRequest) {
       pathname === "/api/invites"
     ) {
       if (payload.role !== "admin") {
-        return NextResponse.redirect(new URL("/", request.url));
+        return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     }
 

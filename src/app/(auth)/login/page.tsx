@@ -12,7 +12,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     fetch("/api/auth/me").then((r) => {
-      if (r.ok) router.replace("/");
+      if (r.ok) router.replace("/dashboard");
     });
   }, [router]);
 
@@ -30,7 +30,7 @@ export default function LoginPage() {
     const data = await res.json();
 
     if (res.ok) {
-      router.push("/");
+      router.push("/dashboard");
     } else {
       setError(data.error || "Ошибка входа");
       setLoading(false);

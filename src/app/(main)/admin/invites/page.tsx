@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminInvitesPage() {
   const user = await getCurrentUser();
   if (!user || user.role !== "admin") {
-    redirect("/");
+    redirect("/dashboard");
   }
 
   const rows = await db
