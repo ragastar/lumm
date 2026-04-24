@@ -208,68 +208,75 @@ git commit -m "refactor(dashboard): перенос / на /dashboard (#27)"
 
 ---
 
-## Task 4: Обновить редиректы login-flow на `/dashboard`
+## Task 4: Обновить все runtime-редиректы с `/` на `/dashboard`
 
-**Files:**
-- Modify: `src/app/(auth)/login/page.tsx:14`, `:37`
-- Modify: `src/proxy.ts:47`
+**Files (5 файлов, 6 мест):**
+- Modify: `src/app/(auth)/login/page.tsx` — `router.replace("/")` и `router.push("/")`
+- Modify: `src/app/(auth)/onboard/page.tsx` — `router.push("/")` после онбординга
+- Modify: `src/proxy.ts` — `NextResponse.redirect(new URL("/", ...))` для не-админа с `/api/invites`
+- Modify: `src/app/(main)/admin/members/page.tsx` — `redirect("/")` при не-admin
+- Modify: `src/app/(main)/admin/invites/page.tsx` — `redirect("/")` при не-admin
 
-- [ ] **Step 1: В `src/app/(auth)/login/page.tsx` заменить два `"/"` на `"/dashboard"`**
+**Важно:** после замен — финальный grep, чтобы убедиться что не осталось ни одного `router.push("/")`, `router.replace("/")`, `redirect("/")`, `NextResponse.redirect(..."/"...)`. `href="/"`-ссылки — это отдельная Task 5, в Task 4 не трогаем. Лендинговое `<Link href="/">` в `(marketing)/layout.tsx` (которое появится в Task 7) — это намеренная ссылка на корень, она должна остаться как есть.
 
-Текущий код содержит:
-
-```typescript
-useEffect(() => {
-  fetch("/api/auth/me").then((r) => {
-    if (r.ok) router.replace("/");
-  });
-}, [router]);
-```
-
-и
+- [ ] **Step 1: login/page.tsx — 2 замены**
 
 ```typescript
-if (res.ok) {
-  router.push("/");
-}
-```
-
-Заменить оба `"/"` на `"/dashboard"`:
-
-```typescript
+// useEffect:
 if (r.ok) router.replace("/dashboard");
-```
 
-```typescript
+// handleSubmit:
 if (res.ok) {
   router.push("/dashboard");
 }
 ```
 
-- [ ] **Step 2: В `src/proxy.ts` заменить редирект не-админа с `/api/invites`**
+- [ ] **Step 2: onboard/page.tsx**
 
-Текущая строка (около 47):
+Найти `router.push("/")` (примерно строка 42) и заменить на `router.push("/dashboard")`.
 
-```typescript
-return NextResponse.redirect(new URL("/", request.url));
-```
-
-Заменить на:
+- [ ] **Step 3: proxy.ts**
 
 ```typescript
 return NextResponse.redirect(new URL("/dashboard", request.url));
 ```
 
-- [ ] **Step 3: Билд**
+- [ ] **Step 4: admin/members/page.tsx**
 
-Run: `cd /root/lumm && npm run build 2>&1 | tail -10`
-Expected: успех.
+Серверный `redirect` из `next/navigation`:
+```typescript
+redirect("/dashboard");
+```
 
-- [ ] **Step 4: Коммит**
+- [ ] **Step 5: admin/invites/page.tsx**
+
+Аналогично:
+```typescript
+redirect("/dashboard");
+```
+
+- [ ] **Step 6: Финальный grep**
 
 ```bash
-cd /root/lumm && git add src/app/\(auth\)/login/page.tsx src/proxy.ts && \
-git commit -m "fix(auth): редирект после логина на /dashboard (#27)"
+cd /root/lumm/.worktrees/luum-landing && \
+  grep -rnE 'router\.(push|replace)\("/"\)|redirect\("/"\)|NextResponse\.redirect\(new URL\("/",' src --include="*.tsx" --include="*.ts"
+```
+
+Expected: пусто. Если что-то нашлось — стоп, отчитаться.
+
+- [ ] **Step 7: Билд**
+
+```bash
+cd /root/lumm/.worktrees/luum-landing && npm run build 2>&1 | tail -10
+```
+Expected: успех.
+
+- [ ] **Step 8: Коммит**
+
+```bash
+cd /root/lumm/.worktrees/luum-landing && \
+  git add src/app/\(auth\)/login/page.tsx src/app/\(auth\)/onboard/page.tsx src/proxy.ts "src/app/(main)/admin/members/page.tsx" "src/app/(main)/admin/invites/page.tsx" && \
+  git commit -m "fix(redirects): все runtime-редиректы с / на /dashboard (#27)"
 ```
 
 ---
