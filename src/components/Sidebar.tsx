@@ -14,7 +14,7 @@ type NavItem = {
 };
 
 const activeNav: NavItem[] = [
-  { href: "/", label: "Dashboard", icon: "◆" },
+  { href: "/dashboard", label: "Dashboard", icon: "◆" },
   { href: "/reports", label: "Еженедельные", icon: "◇" },
   { href: "/financials", label: "Ежемесячные", icon: "◈" },
   { href: "/analytics", label: "Аналитика", icon: "◈" },
