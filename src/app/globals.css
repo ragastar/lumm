@@ -2,6 +2,15 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
+html {
+  scroll-padding-top: 5rem;
+  scroll-behavior: smooth;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
 :root {
   --lumm-dark: #0d0d0d;
   --lumm-black: #1a1a1a;

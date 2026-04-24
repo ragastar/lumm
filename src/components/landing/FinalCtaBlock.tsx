@@ -1,6 +1,12 @@
+function buildContactHref(raw: string | undefined): string | undefined {
+  const contact = raw?.trim();
+  if (!contact) return undefined;
+  if (contact.startsWith("https://") || contact.startsWith("http://")) return contact;
+  return `https://t.me/${contact.replace(/^@/, "")}`;
+}
+
 export function FinalCtaBlock() {
-  const contact = process.env.NEXT_PUBLIC_APPLICATION_CONTACT;
-  const href = contact ? `https://t.me/${contact.replace(/^@/, "")}` : undefined;
+  const href = buildContactHref(process.env.NEXT_PUBLIC_APPLICATION_CONTACT);
 
   return (
     <section className="text-center space-y-6 py-12">
