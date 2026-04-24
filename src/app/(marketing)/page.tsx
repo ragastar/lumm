@@ -9,6 +9,9 @@ import { ConfidentialityBlock } from "@/components/landing/ConfidentialityBlock"
 import { EngineBridgeBlock } from "@/components/landing/EngineBridgeBlock";
 import { GoalSystemBlock } from "@/components/landing/GoalSystemBlock";
 import { WeeklyReportBlock } from "@/components/landing/WeeklyReportBlock";
+import { FinancialsBlock } from "@/components/landing/FinancialsBlock";
+import { SteeringBlock } from "@/components/landing/SteeringBlock";
+import { SmartCalendarBlock } from "@/components/landing/SmartCalendarBlock";
 
 export const metadata: Metadata = {
   title: "LUMM — закрытый мастермайнд для предпринимателей",
@@ -29,6 +32,9 @@ export default function LandingPage() {
       <EngineBridgeBlock />
       <GoalSystemBlock />
       <WeeklyReportBlock />
+      <FinancialsBlock />
+      <SteeringBlock />
+      <SmartCalendarBlock />
     </div>
   );
 }
