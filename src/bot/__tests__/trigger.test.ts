@@ -7,9 +7,11 @@ describe("matchTrigger", () => {
     expect(r).toBe("бизнес провалил, спорт ок");
   });
 
-  it("matches phrase then mention at end", () => {
+  it("phrase before mention at end — no longer matches (strict first-word rule, #28)", () => {
+    // Intentional behaviour change: mention must come before the phrase.
+    // "Еженедельный отчёт ... @lummbrain_bot" → mention is last, nothing after it.
     const r = matchTrigger("Еженедельный отчёт: закрыл 3 сделки, 10 км пробежал @lummbrain_bot");
-    expect(r).toBe("закрыл 3 сделки, 10 км пробежал");
+    expect(r).toBeNull();
   });
 
   it("is case-insensitive", () => {
@@ -57,5 +59,23 @@ describe("matchTrigger", () => {
   it("returns null when body is empty after stripping", () => {
     expect(matchTrigger("@lummbrain_bot Еженедельный отчёт")).toBeNull();
     expect(matchTrigger("@lummbrain_bot Еженедельный отчёт    ")).toBeNull();
+  });
+
+  it("regression #28: штурвал первым словом со словом «отчета» в теле — НЕ report-триггер", () => {
+    const text = "@lummbrain_bot штурвал , есть предложение выбрать один формат отчета для всех";
+    expect(matchTrigger(text)).toBeNull();
+  });
+
+  it("отчёт первым словом, штурвал в теле — это report-триггер", () => {
+    const text = "@lummbrain_bot еженедельный отчёт всё ок, штурвал крутится";
+    // body = "всё ок, штурвал крутится"
+    const body = matchTrigger(text);
+    expect(body).toContain("штурвал");
+    expect(body).toContain("всё ок");
+  });
+
+  it("слово «отчёт» где-то в середине без trigger first-word → не триггерит", () => {
+    const text = "@lummbrain_bot привет, у меня вопрос про отчёт";
+    expect(matchTrigger(text)).toBeNull();
   });
 });

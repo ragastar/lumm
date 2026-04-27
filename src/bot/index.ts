@@ -33,20 +33,20 @@ bot.on("message:text", async (ctx) => {
   };
 
   try {
-    const handled = await handleReport({
-      text: ctx.message.text,
-      fromId: String(ctx.from.id),
-      reply,
-      baseUrl,
-    });
-    if (handled) return;
-
-    await handleSteering({
+    const handled = await handleSteering({
       text: ctx.message.text,
       fromId: String(ctx.from.id),
       reply,
       baseUrl,
       botUsername: process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? "lummbrain_bot",
+    });
+    if (handled) return;
+
+    await handleReport({
+      text: ctx.message.text,
+      fromId: String(ctx.from.id),
+      reply,
+      baseUrl,
     });
   } catch (err) {
     console.error("[bot] handler crashed:", err);

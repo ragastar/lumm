@@ -42,4 +42,24 @@ describe("matchSteeringTrigger", () => {
   it("пробелы вокруг тела — триммятся", () => {
     expect(matchSteeringTrigger("@lummbrain_bot штурвал    тест   ", BOT)).toBe("тест");
   });
+
+  it("regression #28: штурвал первым словом, в теле есть «отчета»", () => {
+    const text = "@lummbrain_bot штурвал , есть предложение выбрать один формат отчета для всех";
+    expect(matchSteeringTrigger(text, "lummbrain_bot")).toBe(", есть предложение выбрать один формат отчета для всех");
+  });
+
+  it("штурвал не первым словом → не триггерит", () => {
+    const text = "@lummbrain_bot еженедельный отчёт всё ок, штурвал крутится";
+    expect(matchSteeringTrigger(text, "lummbrain_bot")).toBeNull();
+  });
+
+  it("штурвалы (склонение) → не триггерит", () => {
+    const text = "@lummbrain_bot штурвалы все на месте";
+    expect(matchSteeringTrigger(text, "lummbrain_bot")).toBeNull();
+  });
+
+  it("штурвал с двоеточием после", () => {
+    const text = "@lummbrain_bot штурвал: всё плохо";
+    expect(matchSteeringTrigger(text, "lummbrain_bot")).toBe("всё плохо");
+  });
 });
